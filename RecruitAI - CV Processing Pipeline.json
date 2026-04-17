@@ -1,0 +1,293 @@
+{
+  "name": "RecruitAI - CV Processing Pipeline",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "candidate",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "node-webhook",
+      "name": "Webhook - Receive Candidate",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        240,
+        304
+      ],
+      "webhookId": "recruitai-candidate-webhook"
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = $input.first().json;\nconst data = raw.body || raw;\nconst required = ['candidate_id', 'job_id', 'cv_path'];\nfor (const field of required) {\n  if (!data[field]) throw new Error('Missing required field: ' + field);\n}\nconst cvUrl = data.cv_path;\nlet fileId = '';\nconst match = cvUrl.match(/\\/d\\/([a-zA-Z0-9_-]+)/);\nif (match) fileId = match[1];\nelse if (cvUrl.includes('id=')) fileId = new URL(cvUrl).searchParams.get('id') || '';\nif (!fileId) throw new Error('Cannot extract Google Drive file ID from: ' + cvUrl);\nreturn [{ json: {\n  candidate_id: data.candidate_id,\n  candidate_name: data.candidate_name || '',\n  job_id: data.job_id,\n  job_title: data.job_title || data.division || '',\n  job_description: data.job_description || '',\n  key_responsibilities: data.key_responsibilities || '',\n  minimum_qualifications: data.minimum_qualifications || '',\n  threshold_score: parseInt(data.threshold_score) || 70,\n  cv_path: cvUrl,\n  division: data.division || '',\n  gdrive_file_id: fileId,\n  download_url: 'https://drive.google.com/uc?export=download&id=' + fileId\n}}];"
+      },
+      "id": "node-validate",
+      "name": "Code - Validate & Extract",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        480,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.download_url }}",
+        "options": {
+          "redirect": {
+            "redirect": {
+              "maxRedirects": 5
+            }
+          },
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "id": "node-download-cv",
+      "name": "HTTP - Download CV PDF",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        720,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "options": {}
+      },
+      "id": "node-extract-pdf",
+      "name": "Extract from File - PDF Text",
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        960,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const cvText = ($input.first().json.text || '').trim();\nif (!cvText) throw new Error('CV text extraction failed or CV is empty');\nconst jobData = $('Code - Validate & Extract').first().json;\nconst prompt = `You are an AI recruitment assistant evaluating a candidate CV for the position of \"${jobData.job_title || jobData.division}\" at a technology company.\\n\\n## JOB INFORMATION\\nPosition: ${jobData.job_title || jobData.division}\\nDescription: ${jobData.job_description || 'Not provided'}\\nKey Responsibilities: ${jobData.key_responsibilities || 'Not specified'}\\nMinimum Qualifications: ${jobData.minimum_qualifications || 'Not specified'}\\nMinimum passing score: ${jobData.threshold_score}/100\\n\\n## CANDIDATE CV\\n${cvText.substring(0, 6000)}\\n\\n## EVALUATION INSTRUCTIONS\\nEvaluate how well this candidate matches the job requirements.\\nRespond ONLY with valid JSON, no markdown, no explanation outside the JSON:\\n{\\n  \"score\": <integer 0-100>,\\n  \"reasoning\": \"<2-3 sentence summary>\",\\n  \"strengths\": [\"<strength 1>\", \"<strength 2>\"],\\n  \"gaps\": [\"<gap 1>\"]\\n}`;\nconst llmBody = JSON.stringify({\n  model: 'llama3.2',\n  messages: [{ role: 'user', content: prompt }],\n  stream: false,\n  format: 'json',\n  options: { temperature: 0.3 }\n});\nreturn [{ json: { ...jobData, cv_text_preview: cvText.substring(0, 200), llm_request_body: llmBody }}];"
+      },
+      "id": "node-build-prompt",
+      "name": "Code - Build LLM Prompt",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1200,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://host.docker.internal:11434/api/chat",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ $json.llm_request_body }}",
+        "options": {
+          "timeout": 120000
+        }
+      },
+      "id": "node-llm-score",
+      "name": "HTTP - LLM Scoring (Ollama)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        1440,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const llmResponse = $input.first().json;\nconst jobData = $('Code - Validate & Extract').first().json;\nconst content = llmResponse.message?.content || llmResponse.response || '';\nlet evalResult;\ntry {\n  const cleaned = content.replace(/```json\\n?/g, '').replace(/```\\n?/g, '').trim();\n  const jsonMatch = cleaned.match(/\\{[\\s\\S]*\\}/);\n  evalResult = JSON.parse(jsonMatch ? jsonMatch[0] : cleaned);\n} catch(e) {\n  console.log('Failed to parse Ollama JSON, fallback. Raw:', content);\n  evalResult = { score: 50, reasoning: 'Automated review completed. Manual review recommended.', strengths: [], gaps: [] };\n}\nconst score = Math.min(100, Math.max(0, parseInt(evalResult.score) || 0));\nconst threshold = jobData.threshold_score || 70;\nconst status = score >= threshold ? 'accepted' : 'rejected';\nconsole.log(`Candidate ${jobData.candidate_id}: score=${score}, threshold=${threshold}, status=${status}`);\nconst updateBody = JSON.stringify({\n  candidate_id: jobData.candidate_id,\n  score,\n  status,\n  ai_reasoning: evalResult.reasoning || ''\n});\nreturn [{ json: {\n  candidate_id: jobData.candidate_id,\n  score, status, threshold,\n  ai_reasoning: evalResult.reasoning || '',\n  strengths: evalResult.strengths || [],\n  gaps: evalResult.gaps || [],\n  update_body: updateBody\n}}];"
+      },
+      "id": "node-parse-result",
+      "name": "Code - Parse Score & Status",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1680,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://host.docker.internal:3000/api/n8n/update-result",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ $json.update_body }}",
+        "options": {
+          "timeout": 10000
+        }
+      },
+      "id": "node-update-backend",
+      "name": "HTTP - Update Candidate in Backend",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        1920,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "options": {
+          "responseCode": 200,
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          }
+        }
+      },
+      "id": "node-respond",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        2160,
+        304
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook - Receive Candidate": {
+      "main": [
+        [
+          {
+            "node": "Code - Validate & Extract",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code - Validate & Extract": {
+      "main": [
+        [
+          {
+            "node": "HTTP - Download CV PDF",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP - Download CV PDF": {
+      "main": [
+        [
+          {
+            "node": "Extract from File - PDF Text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File - PDF Text": {
+      "main": [
+        [
+          {
+            "node": "Code - Build LLM Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code - Build LLM Prompt": {
+      "main": [
+        [
+          {
+            "node": "HTTP - LLM Scoring (Ollama)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP - LLM Scoring (Ollama)": {
+      "main": [
+        [
+          {
+            "node": "Code - Parse Score & Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code - Parse Score & Status": {
+      "main": [
+        [
+          {
+            "node": "HTTP - Update Candidate in Backend",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP - Update Candidate in Backend": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "saveExecutionProgress": true,
+    "saveManualExecutions": true,
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all",
+    "executionTimeout": 3600,
+    "timezone": "UTC",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "versionId": "e6fc61b5-e0b9-42eb-bdf2-38f1025a4270",
+  "meta": {
+    "instanceId": "c0166cde65ccfbbfa427b7e17e663ff3553abf127fa740f60016c9494c5a1b25"
+  },
+  "id": "GgerXoiC0qituOAK",
+  "tags": []
+}
