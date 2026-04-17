@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Apply for Senior UX Designer | RecruitAI</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-surface-variant": "#43474f",
+                      "on-secondary-container": "#002115",
+                      "secondary": "#006c4d",
+                      "surface-tint": "#003366",
+                      "secondary-fixed-dim": "#69dbad",
+                      "tertiary-container": "#592300",
+                      "on-tertiary": "#ffffff",
+                      "outline": "#737780",
+                      "inverse-primary": "#a7c8ff",
+                      "surface-dim": "#d9dadb",
+                      "on-primary-fixed": "#001b3c",
+                      "on-background": "#191c1d",
+                      "inverse-surface": "#2e3132",
+                      "surface-container-low": "#f3f4f5",
+                      "background": "#f8f9fa",
+                      "tertiary-fixed": "#ffdbca",
+                      "surface-container-highest": "#e1e3e4",
+                      "surface-container": "#edeeef",
+                      "tertiary": "#381300",
+                      "surface-bright": "#f8f9fa",
+                      "on-tertiary-container": "#d8885c",
+                      "on-surface": "#191c1d",
+                      "surface-variant": "#e1e3e4",
+                      "primary-container": "#d5e3ff",
+                      "on-secondary-fixed-variant": "#005139",
+                      "on-error-container": "#410002",
+                      "error": "#ba1a1a",
+                      "secondary-container": "#86f8c8",
+                      "on-primary-container": "#001b3c",
+                      "on-tertiary-fixed": "#341100",
+                      "surface-container-high": "#e7e8e9",
+                      "error-container": "#ffdad6",
+                      "secondary-fixed": "#86f8c8",
+                      "primary": "#003366",
+                      "inverse-on-surface": "#f0f1f2",
+                      "primary-fixed-dim": "#a7c8ff",
+                      "on-secondary": "#ffffff",
+                      "outline-variant": "#c3c6d1",
+                      "surface": "#f8f9fa",
+                      "on-secondary-fixed": "#002115",
+                      "tertiary-fixed-dim": "#ffb690",
+                      "on-primary": "#ffffff",
+                      "surface-container-lowest": "#ffffff",
+                      "on-primary-fixed-variant": "#1f477b",
+                      "on-error": "#ffffff",
+                      "on-tertiary-fixed-variant": "#723610",
+                      "primary-fixed": "#d5e3ff"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.5rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "fontFamily": {
+                      "headline": ["Manrope"],
+                      "body": ["Inter"],
+                      "label": ["Inter"]
+              }
+            },
+          },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .focus-primary:focus { outline: 2px solid #003366; outline-offset: 2px; border-color: transparent; }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f9fa;
+            color: #191c1d;
+        }
+        h1, h2, h3 {
+            font-family: 'Manrope', sans-serif;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+<!-- Top Navigation Anchor (from JSON) -->
+<nav class="fixed top-0 w-full z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl shadow-sm dark:shadow-none">
+<div class="flex justify-between items-center px-8 py-4 max-w-7xl mx-auto">
+<div class="text-2xl font-bold tracking-tighter text-primary">RecruitAI</div>
+<div class="flex items-center">
+<a class="font-['Manrope'] font-bold tracking-tight text-primary hover:opacity-80 transition-opacity flex items-center gap-1" href="#">
+<span class="material-symbols-outlined text-xl">chevron_left</span>
+Back to Listings
+</a>
+</div>
+</div>
+</nav>
+<!-- Main Content Canvas -->
+<main class="flex-grow pt-32 pb-24 px-6">
+<div class="max-w-2xl mx-auto">
+<!-- Header Section -->
+<header class="text-center mb-12">
+<h1 class="text-4xl md:text-5xl font-extrabold text-primary tracking-tight mb-2">Senior UX Designer</h1>
+<p class="text-on-surface-variant font-medium flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-base">location_on</span> Jakarta, ID 
+                <span class="text-outline-variant">•</span>
+<span class="material-symbols-outlined text-base">work</span> Full-time
+            </p>
+</header>
+<!-- Form Container -->
+<div class="bg-surface-container-lowest rounded-xl p-8 md:p-12 shadow-sm border border-surface-container-highest">
+<form class="space-y-8" onsubmit="return false;">
+<!-- Full Name -->
+<div class="space-y-2">
+<label class="block text-sm font-semibold text-on-surface" for="full_name">Full Name <span class="text-error">*</span></label>
+<div class="relative">
+<input autocomplete="name" class="w-full bg-surface-container-low border-none rounded-lg py-4 px-4 text-on-surface focus-primary transition-all placeholder:text-outline" id="full_name" name="full_name" placeholder="Enter your full name" required="" type="text"/>
+</div>
+</div>
+<!-- Email Address -->
+<div class="space-y-2">
+<label class="block text-sm font-semibold text-on-surface" for="email">Email Address <span class="text-error">*</span></label>
+<div class="relative">
+<input class="w-full bg-surface-container-low border-none rounded-lg py-4 px-4 text-on-surface focus-primary transition-all placeholder:text-outline" id="email" name="email" placeholder="name@company.com" required="" type="email"/>
+<div class="mt-2 flex flex-wrap gap-2">
+<button class="text-xs bg-surface-container-high px-2 py-1 rounded-md hover:bg-surface-container-highest transition-colors" type="button">@gmail.com</button>
+<button class="text-xs bg-surface-container-high px-2 py-1 rounded-md hover:bg-surface-container-highest transition-colors" type="button">@outlook.com</button>
+<button class="text-xs bg-surface-container-high px-2 py-1 rounded-md hover:bg-surface-container-highest transition-colors" type="button">@icloud.com</button>
+</div>
+</div>
+</div>
+<!-- Phone Number -->
+<div class="space-y-2">
+<label class="block text-sm font-semibold text-on-surface" for="phone">Phone Number <span class="text-error">*</span></label>
+<div class="flex gap-3">
+<div class="relative min-w-[100px]">
+<div class="bg-surface-container-low h-full flex items-center justify-between px-3 rounded-lg cursor-pointer hover:bg-surface-container-high transition-colors">
+<span class="flex items-center gap-2 font-medium">🇮🇩 +62</span>
+<span class="material-symbols-outlined text-sm">expand_more</span>
+</div>
+</div>
+<input class="flex-grow bg-surface-container-low border-none rounded-lg py-4 px-4 text-on-surface focus-primary transition-all placeholder:text-outline" id="phone" name="phone" placeholder="812 3456 7890" required="" type="tel"/>
+</div>
+</div>
+<!-- Portfolio Link -->
+<div class="space-y-2">
+<label class="block text-sm font-semibold text-on-surface" for="portfolio">Portfolio Link <span class="text-outline-variant font-normal">(Optional)</span></label>
+<div class="relative group">
+<span class="absolute left-4 top-1/2 -translate-y-1/2 material-symbols-outlined text-outline group-focus-within:text-primary transition-colors">link</span>
+<input class="w-full bg-surface-container-low border-none rounded-lg py-4 pl-12 pr-4 text-on-surface focus-primary transition-all placeholder:text-outline" id="portfolio" name="portfolio" placeholder="https://" type="url"/>
+</div>
+</div>
+<!-- Upload CV -->
+<div class="space-y-2">
+<label class="block text-sm font-semibold text-on-surface">Upload CV <span class="text-error">*</span></label>
+<!-- Drag & Drop Zone -->
+<div class="border-2 border-dashed border-outline-variant rounded-xl p-10 flex flex-col items-center justify-center text-center bg-surface-container-low/30 hover:bg-surface-container-low hover:border-primary transition-all cursor-pointer group">
+<div class="w-14 h-14 rounded-full bg-white flex items-center justify-center mb-4 shadow-sm group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-primary text-3xl">upload_file</span>
+</div>
+<p class="text-on-surface font-semibold mb-1">Click to upload or drag and drop</p>
+<p class="text-on-surface-variant text-sm">PDF or DOCX (Max 5MB)</p>
+</div>
+<!-- Uploaded State Example -->
+<div class="mt-4 p-4 bg-surface-container-low rounded-lg flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded bg-white flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">picture_as_pdf</span>
+</div>
+<div>
+<p class="text-sm font-bold text-on-surface">resume_senior_ux_designer.pdf</p>
+<p class="text-xs text-on-surface-variant">2.4 MB • Complete</p>
+</div>
+</div>
+<button class="w-8 h-8 rounded-full flex items-center justify-center hover:bg-error-container hover:text-on-error-container transition-colors" type="button">
+<span class="material-symbols-outlined text-lg">close</span>
+</button>
+</div>
+</div>
+<!-- Submit Button -->
+<div class="pt-6">
+<button class="w-full bg-primary text-on-primary py-5 rounded-xl font-bold text-lg flex items-center justify-center gap-3 shadow-lg shadow-primary/20 hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed" type="submit">
+                        Kirim Lamaran
+                        <span class="material-symbols-outlined">arrow_forward</span>
+</button>
+<!-- Example Loading State (Hidden by default) -->
+<button class="hidden w-full bg-primary text-on-primary py-5 rounded-xl font-bold text-lg flex items-center justify-center gap-3" disabled="" type="button">
+<svg class="animate-spin h-5 w-5 text-white" fill="none" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+<path class="opacity-75" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" fill="currentColor"></path>
+</svg>
+                        Mengirim...
+                    </button>
+<p class="text-center text-xs text-on-surface-variant mt-4">
+                        By clicking "Kirim Lamaran", you agree to RecruitAI’s <a class="underline font-medium hover:text-primary" href="#">Privacy Policy</a> and <a class="underline font-medium hover:text-primary" href="#">Terms of Service</a>.
+                    </p>
+</div>
+</form>
+</div>
+</div>
+</main>
+<!-- Footer Anchor (from JSON) -->
+<footer class="w-full mt-auto py-12 px-8 bg-slate-50 dark:bg-slate-950">
+<div class="flex flex-col md:flex-row justify-between items-center gap-6 max-w-7xl mx-auto">
+<div class="font-['Manrope'] font-bold text-primary">RecruitAI</div>
+<p class="font-['Inter'] text-sm text-slate-500 text-center">© 2024 RecruitAI. Built for the Digital Curator.</p>
+<div class="flex flex-wrap justify-center gap-6">
+<a class="text-slate-500 hover:text-primary transition-colors" href="#">Privacy Policy</a>
+<a class="text-slate-500 hover:text-primary transition-colors" href="#">Terms of Service</a>
+<a class="text-slate-500 hover:text-primary transition-colors" href="#">Cookie Settings</a>
+<a class="text-slate-500 hover:text-primary transition-colors" href="#">Accessibility</a>
+</div>
+</div>
+</footer>
+</body></html>

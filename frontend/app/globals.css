@@ -1,0 +1,159 @@
+@import "tailwindcss";
+
+:root {
+  /* === Design System: The Digital Curator === */
+  /* Primary palette — Deep Navy */
+  --primary: #003366;
+  --primary-container: #d5e3ff;
+  --on-primary: #ffffff;
+  --on-primary-container: #001b3c;
+
+  /* Secondary palette — Mint Accent */
+  --secondary: #006c4d;
+  --secondary-container: #86f8c8;
+  --on-secondary: #ffffff;
+
+  /* Surface hierarchy (layered paper) */
+  --background: #f8f9fa;
+  --surface: #f8f9fa;
+  --surface-container-lowest: #ffffff;
+  --surface-container-low: #f3f4f5;
+  --surface-container: #edeeef;
+  --surface-container-high: #e7e8e9;
+  --surface-container-highest: #e1e3e4;
+
+  /* Text tokens */
+  --on-surface: #191c1d;
+  --on-surface-variant: #43474f;
+  --outline: #737780;
+  --outline-variant: #c3c6d1;
+
+  /* Error */
+  --error: #ba1a1a;
+  --error-container: #ffdad6;
+  --on-error: #ffffff;
+  --on-error-container: #410002;
+
+  /* Functional */
+  --success: #16A34A;
+  --success-bg: #F0FDF4;
+  --success-border: #BBF7D0;
+  --success-icon-bg: #DCFCE7;
+
+  /* Legacy maroon (kept for SuccessView compat) */
+  --maroon: #003366;
+  --maroon-dark: #001e40;
+  --maroon-light: #d5e3ff;
+  --maroon-border: #c3c6d1;
+}
+
+@theme inline {
+  /* Primary */
+  --color-primary: var(--primary);
+  --color-primary-container: var(--primary-container);
+  --color-on-primary: var(--on-primary);
+  --color-on-primary-container: var(--on-primary-container);
+
+  /* Secondary */
+  --color-secondary: var(--secondary);
+  --color-secondary-container: var(--secondary-container);
+  --color-on-secondary: var(--on-secondary);
+
+  /* Surfaces */
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-lowest: var(--surface-container-lowest);
+  --color-surface-low: var(--surface-container-low);
+  --color-surface-container: var(--surface-container);
+  --color-surface-high: var(--surface-container-high);
+  --color-surface-highest: var(--surface-container-highest);
+
+  /* Text */
+  --color-on-surface: var(--on-surface);
+  --color-on-surface-variant: var(--on-surface-variant);
+  --color-outline: var(--outline);
+  --color-outline-variant: var(--outline-variant);
+
+  /* Error */
+  --color-error: var(--error);
+  --color-error-container: var(--error-container);
+  --color-on-error: var(--on-error);
+  --color-on-error-container: var(--on-error-container);
+
+  /* Functional */
+  --color-success: var(--success);
+  --color-success-bg: var(--success-bg);
+  --color-success-border: var(--success-border);
+  --color-success-icon-bg: var(--success-icon-bg);
+
+  /* Legacy aliases (components backward-compat) */
+  --color-maroon: var(--maroon);
+  --color-maroon-dark: var(--maroon-dark);
+  --color-maroon-light: var(--maroon-light);
+  --color-maroon-border: var(--maroon-border);
+  --color-bg: var(--background);
+  --color-card: var(--surface-container-lowest);
+  --color-text: var(--on-surface);
+  --color-muted: var(--on-surface-variant);
+  --color-border: var(--outline-variant);
+  --color-danger: var(--error);
+  --color-footer-bg: #1a1a2e;
+
+  /* Fonts */
+  --font-dm-sans: var(--font-dm-sans);
+  --font-headline: "Manrope", sans-serif;
+  --font-body: "Inter", sans-serif;
+
+  /* Animations */
+  --animate-spin: spin 1s linear infinite;
+  --animate-pop-in: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+
+  /* Shadows */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06);
+  --shadow-primary: 0 4px 16px rgba(0, 51, 102, 0.2);
+  --shadow-primary-lg: 0 6px 24px rgba(0, 51, 102, 0.25);
+  --shadow-nav: 0 1px 4px rgba(0, 0, 0, 0.04);
+  /* Legacy aliases */
+  --shadow-maroon: var(--shadow-primary);
+  --shadow-maroon-lg: var(--shadow-primary-lg);
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes popIn {
+  from { transform: scale(0); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+/* Material Symbols icon settings */
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+/* Focus style for inputs matching Stitch design */
+.focus-primary:focus {
+  outline: 2px solid #003366;
+  outline-offset: 2px;
+  border-color: transparent;
+}
+
+/* Ghost-focus for admin form inputs (matches Stitch design) */
+.input-ghost-focus:focus {
+  background-color: #ffffff;
+  border-color: #006c4d;
+  box-shadow: 0 0 0 2px rgba(0, 108, 77, 0.1);
+  outline: none;
+}
+
+body {
+  font-family: "Inter", var(--font-dm-sans), sans-serif;
+  background-color: var(--background);
+  color: var(--on-surface);
+}
+
+h1, h2, h3 {
+  font-family: "Manrope", var(--font-dm-sans), sans-serif;
+}

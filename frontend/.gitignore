@@ -1,0 +1,9 @@
+.next/
+node_modules/
+.env
+uploads/
+service-account-key.json
+*.log
+.DS_Store
+*.pem
+.vercel
