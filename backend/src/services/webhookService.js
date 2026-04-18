@@ -12,6 +12,7 @@ async function sendToWebhook(data) {
     const payload = {
         candidate_id: data.candidate_id,
         candidate_name: data.candidate_name || '',
+        email: data.email || '',
         job_id: data.job_id,
         job_title: data.job_title || data.division || '',
         job_description: data.job_description || '',

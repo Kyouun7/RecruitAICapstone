@@ -8,27 +8,27 @@
         "responseMode": "responseNode",
         "options": {}
       },
-      "id": "b7a5edc1-08e6-4ce7-a71c-f6b7a201a653",
+      "id": "2ed975b6-6ef0-43aa-8166-c29fbcb50821",
       "name": "Webhook - Receive Candidate",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
       "position": [
-        0,
-        0
+        -2160,
+        128
       ],
       "webhookId": "recruitai-candidate-webhook"
     },
     {
       "parameters": {
-        "jsCode": "const raw = $input.first().json;\nconst data = raw.body || raw;\n\nconst required = ['candidate_id', 'job_id', 'cv_path'];\nfor (const field of required) {\n  if (!data[field]) throw new Error('Missing required field: ' + field);\n}\n\nconst cvUrl = data.cv_path;\nlet fileId = '';\n\n// format: /file/d/ID/view\nconst match = cvUrl.match(/\\/d\\/([a-zA-Z0-9_-]+)/);\nif (match) {\n  fileId = match[1];\n}\n// format: ?id=ID\nelse if (cvUrl.includes('id=')) {\n  const parts = cvUrl.split('id=');\n  fileId = parts[1]?.split('&')[0] || '';\n}\n\nif (!fileId) {\n  throw new Error('Cannot extract Google Drive file ID from: ' + cvUrl);\n}\n\nreturn [{\n  json: {\n    candidate_id: data.candidate_id,\n    candidate_name: data.candidate_name || '',\n    job_id: data.job_id,\n    job_title: data.job_title || data.division || '',\n    job_description: data.job_description || '',\n    key_responsibilities: data.key_responsibilities || '',\n    minimum_qualifications: data.minimum_qualifications || '',\n    threshold_score: parseInt(data.threshold_score) || 70,\n    cv_path: cvUrl,\n    division: data.division || '',\n    gdrive_file_id: fileId,\n    download_url: 'https://drive.google.com/uc?export=download&id=' + fileId\n  }\n}];"
+        "jsCode": "const raw = $input.first().json;\nconst data = raw.body || raw;\n\nconst required = ['candidate_id', 'job_id', 'cv_path'];\nfor (const field of required) {\n  if (!data[field]) throw new Error('Missing required field: ' + field);\n}\n\nconst cvUrl = data.cv_path;\nlet fileId = '';\n\n// format: /file/d/ID/view\nconst match = cvUrl.match(/\\/d\\/([a-zA-Z0-9_-]+)/);\nif (match) {\n  fileId = match[1];\n}\n// format: ?id=ID\nelse if (cvUrl.includes('id=')) {\n  const parts = cvUrl.split('id=');\n  fileId = parts[1]?.split('&')[0] || '';\n}\n\nif (!fileId) {\n  throw new Error('Cannot extract Google Drive file ID from: ' + cvUrl);\n}\n\nreturn [{\n  json: {\n    candidate_id: data.candidate_id,\n    candidate_name: data.candidate_name || '',\n    email: data.email || '',\n    job_id: data.job_id,\n    job_title: data.job_title || data.division || '',\n    job_description: data.job_description || '',\n    key_responsibilities: data.key_responsibilities || '',\n    minimum_qualifications: data.minimum_qualifications || '',\n    threshold_score: parseInt(data.threshold_score) || 70,\n    cv_path: cvUrl,\n    division: data.division || '',\n    gdrive_file_id: fileId,\n    download_url: 'https://drive.google.com/uc?export=download&id=' + fileId\n  }\n}];"
       },
-      "id": "942ee099-9e72-4381-9876-82da794ecefb",
+      "id": "7a79bfbf-8161-470a-ba56-18675261d981",
       "name": "Code - Validate & Extract",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        240,
-        0
+        -1920,
+        128
       ]
     },
     {
@@ -47,13 +47,13 @@
           }
         }
       },
-      "id": "fb0f86c9-893e-4038-9ce5-172e4309b764",
+      "id": "006c713f-86a0-488f-9c44-496672dd0d61",
       "name": "HTTP - Download CV PDF",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4,
       "position": [
-        480,
-        0
+        -1680,
+        128
       ]
     },
     {
@@ -61,26 +61,26 @@
         "operation": "pdf",
         "options": {}
       },
-      "id": "da4a5c5a-dd36-4b90-b247-922cb3603f5f",
+      "id": "01df4efb-9c6a-495d-82a6-19742f1cd174",
       "name": "Extract from File - PDF Text",
       "type": "n8n-nodes-base.extractFromFile",
       "typeVersion": 1,
       "position": [
-        720,
-        0
+        -1440,
+        128
       ]
     },
     {
       "parameters": {
         "jsCode": "const cvText = ($input.first().json.text || '').trim();\nif (!cvText) throw new Error('CV text extraction failed or CV is empty');\nconst jobData = $('Code - Validate & Extract').first().json;\nconst prompt = `You are an AI recruitment assistant evaluating a candidate CV for the position of \"${jobData.job_title || jobData.division}\" at a technology company.\\n\\n## JOB INFORMATION\\nPosition: ${jobData.job_title || jobData.division}\\nDescription: ${jobData.job_description || 'Not provided'}\\nKey Responsibilities: ${jobData.key_responsibilities || 'Not specified'}\\nMinimum Qualifications: ${jobData.minimum_qualifications || 'Not specified'}\\nMinimum passing score: ${jobData.threshold_score}/100\\n\\n## CANDIDATE CV\\n${cvText.substring(0, 6000)}\\n\\n## EVALUATION INSTRUCTIONS\\nEvaluate how well this candidate matches the job requirements.\\nRespond ONLY with valid JSON, no markdown, no explanation outside the JSON:\\n{\\n  \"score\": <integer 0-100>,\\n  \"reasoning\": \"<2-3 sentence summary>\",\\n  \"strengths\": [\"<strength 1>\", \"<strength 2>\"],\\n  \"gaps\": [\"<gap 1>\"]\\n}`;\nconst llmBody = JSON.stringify({\n  model: 'llama3.2',\n  messages: [{ role: 'user', content: prompt }],\n  stream: false,\n  format: 'json',\n  options: { temperature: 0.3 }\n});\nreturn [{ json: { ...jobData, cv_text_preview: cvText.substring(0, 200), llm_request_body: llmBody }}];"
       },
-      "id": "eb521609-5669-47d5-8aaa-056b168d5740",
+      "id": "f59ed5ee-b1d6-4724-87fa-1130f16a32a3",
       "name": "Code - Build LLM Prompt",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        960,
-        0
+        -1200,
+        128
       ]
     },
     {
@@ -104,26 +104,26 @@
           "timeout": 120000
         }
       },
-      "id": "6ebd588f-bef0-41ca-b294-78cd46de9641",
+      "id": "dfb6534a-ae48-4b94-96fc-f9d95c0fa3a3",
       "name": "HTTP - LLM Scoring (Ollama)",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4,
       "position": [
-        1200,
-        0
+        -960,
+        128
       ]
     },
     {
       "parameters": {
-        "jsCode": "const llmResponse = $input.first().json;\nconst jobData = $('Code - Validate & Extract').first().json;\nconst content = llmResponse.message?.content || llmResponse.response || '';\nlet evalResult;\ntry {\n  const cleaned = content.replace(/```json\\n?/g, '').replace(/```\\n?/g, '').trim();\n  const jsonMatch = cleaned.match(/\\{[\\s\\S]*\\}/);\n  evalResult = JSON.parse(jsonMatch ? jsonMatch[0] : cleaned);\n} catch(e) {\n  evalResult = { score: 50, reasoning: 'Automated review completed. Manual review recommended.', strengths: [], gaps: [] };\n}\nconst score = Math.min(100, Math.max(0, parseInt(evalResult.score) || 0));\nconst threshold = jobData.threshold_score || 70;\nconst status = score >= threshold ? 'accepted' : 'rejected';\nconst updateBody = JSON.stringify({ candidate_id: jobData.candidate_id, score, status, ai_reasoning: evalResult.reasoning || '' });\nreturn [{ json: { candidate_id: jobData.candidate_id, score, status, threshold, ai_reasoning: evalResult.reasoning || '', strengths: evalResult.strengths || [], gaps: evalResult.gaps || [], update_body: updateBody }}];"
+        "jsCode": "const llmResponse = $input.first().json;\nconst baseData = $('Code - Build LLM Prompt').first().json;\nconst content = llmResponse.message?.content || llmResponse.response || '';\nlet evalResult;\ntry {\n  const cleaned = content.replace(/```json\\n?/g, '').replace(/```\\n?/g, '').trim();\n  const jsonMatch = cleaned.match(/\\{[\\s\\S]*\\}/);\n  evalResult = JSON.parse(jsonMatch ? jsonMatch[0] : cleaned);\n} catch (e) {\n  evalResult = { score: 50, reasoning: 'Automated review completed. Manual review recommended.', strengths: [], gaps: [] };\n}\nconst score = Math.min(100, Math.max(0, parseInt(evalResult.score) || 0));\nconst threshold = parseInt(baseData.threshold_score) || 70;\nconst status = score >= threshold ? 'accepted' : 'rejected';\n\nreturn [{\n  json: {\n    ...baseData,\n    score,\n    status,\n    ai_reasoning: evalResult.reasoning || ''\n  }\n}];"
       },
-      "id": "cdbbe1bd-e3da-40a1-acff-cf08de81e5c6",
+      "id": "6cf29b91-11c2-48f9-bcdf-3e75eed7ae1c",
       "name": "Code - Parse Score & Status",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1440,
-        0
+        -656,
+        128
       ]
     },
     {
@@ -140,21 +140,120 @@
           ]
         },
         "sendBody": true,
-        "contentType": "raw",
-        "rawContentType": "application/json",
-        "body": "={{ $json.update_body }}",
+        "contentType": "json",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "candidate_id",
+              "value": "={{ $json.candidate_id }}"
+            },
+            {
+              "name": "score",
+              "value": "={{ $json.score }}"
+            },
+            {
+              "name": "status",
+              "value": "={{ $json.status }}"
+            },
+            {
+              "name": "ai_reasoning",
+              "value": "={{ $json.ai_reasoning }}"
+            }
+          ]
+        },
         "options": {
           "timeout": 10000
         }
       },
-      "id": "2fec9bb5-652c-4876-ab7d-8c3c3ee89ab7",
+      "id": "b28f6517-5155-4226-9167-7de6813aa363",
       "name": "HTTP - Update Candidate in Backend",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4,
       "position": [
-        1680,
-        0
+        -480,
+        128
       ]
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "id": "df975b22-cd77-4bf8-b230-a908467f1454",
+      "name": "Merge - Preserve Candidate Context",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        -320,
+        128
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.status }}",
+              "value2": "accepted"
+            }
+          ]
+        }
+      },
+      "id": "9fb40635-2515-48b8-a490-7e5bbbfd416e",
+      "name": "IF - Check Accepted",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        -240,
+        128
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.email }}",
+        "subject": "You Passed Initial Screening",
+        "message": "=Hello {{$json.candidate_name}},\n\nCongratulations! You have passed the initial screening for {{$json.job_title}}.\n\nOur team will contact you for the next stage.\n\n- RecruitAI",
+        "options": {}
+      },
+      "id": "e24fc5b4-5432-4217-b6c5-979be293012a",
+      "name": "Gmail - Accepted",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "a4e375b6-131d-48e9-a44f-6277dbf1745b",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "8bcQZW2NdvLA6TwO",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.email }}",
+        "subject": "Application Update",
+        "message": "=Hello {{$json.candidate_name}},\n\nThank you for applying for {{$json.job_title}}.\n\nWe regret to inform you that you were not selected.\n\nWe wish you success in your future applications.\n\n- RecruitAI",
+        "options": {}
+      },
+      "id": "d62b9aca-8674-4838-93dd-c14ee1f42797",
+      "name": "Gmail - Rejected",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2,
+      "position": [
+        0,
+        240
+      ],
+      "webhookId": "55e14d5c-b9c3-4dd3-973a-251c4f22f330",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "8bcQZW2NdvLA6TwO",
+          "name": "Gmail account"
+        }
+      }
     },
     {
       "parameters": {
@@ -170,13 +269,13 @@
           }
         }
       },
-      "id": "47882138-2721-4bf1-bb40-8f74476f4afc",
+      "id": "169878a8-0f63-4fc2-8d93-c3044deb2525",
       "name": "Respond to Webhook",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1,
       "position": [
-        1920,
-        0
+        240,
+        128
       ]
     }
   ],
@@ -197,6 +296,7 @@
           "body": {
             "candidate_id": "CND-TEST-001",
             "candidate_name": "Budi Santoso",
+            "email": "budi@example.com",
             "job_id": "J-AI-001",
             "job_title": "AI Engineer",
             "job_description": "LLM, Python, Machine Learning",
@@ -288,11 +388,67 @@
             "node": "HTTP - Update Candidate in Backend",
             "type": "main",
             "index": 0
+          },
+          {
+            "node": "Merge - Preserve Candidate Context",
+            "type": "main",
+            "index": 0
           }
         ]
       ]
     },
     "HTTP - Update Candidate in Backend": {
+      "main": [
+        [
+          {
+            "node": "Merge - Preserve Candidate Context",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge - Preserve Candidate Context": {
+      "main": [
+        [
+          {
+            "node": "IF - Check Accepted",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF - Check Accepted": {
+      "main": [
+        [
+          {
+            "node": "Gmail - Accepted",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Gmail - Rejected",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail - Accepted": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail - Rejected": {
       "main": [
         [
           {
@@ -307,18 +463,13 @@
   "active": true,
   "settings": {
     "executionOrder": "v1",
-    "binaryMode": "separate",
-    "timeSavedMode": "fixed",
-    "timezone": "Etc/UTC",
-    "saveExecutionProgress": true,
-    "callerPolicy": "workflowsFromSameOwner",
-    "executionTimeout": 3600,
-    "availableInMCP": false
+    "binaryMode": "separate"
   },
-  "versionId": "bd4427f8-c881-4fef-96c3-e7d3a1e367f3",
+  "versionId": "d2da91f6-f3a7-4f30-8690-aab34580ceca",
   "meta": {
+    "templateCredsSetupCompleted": true,
     "instanceId": "8560ccc64edfcdda273aeb154db2d9895569b0feb232aaf23fdb968b63e7fc95"
   },
-  "id": "qkshn577mJGzlriY",
+  "id": "lvXbvphdKfq2hx9q",
   "tags": []
 }

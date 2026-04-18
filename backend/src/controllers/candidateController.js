@@ -47,9 +47,27 @@ async function createCandidate(req, res) {
             console.log('[Webhook] Could not fetch job details:', err.message);
         }
 
+        let webhookEmail = candidate.email || email || '';
+        if (!webhookEmail) {
+            try {
+                const [rows] = await db.execute(
+                    'SELECT email FROM candidates WHERE candidate_id = ? LIMIT 1',
+                    [candidate.candidate_id]
+                );
+                webhookEmail = rows[0]?.email || '';
+            } catch (err) {
+                console.log('[Webhook] Could not fetch candidate email:', err.message);
+            }
+        }
+
+        if (!webhookEmail) {
+            throw new Error('Candidate email is required before sending webhook');
+        }
+
         sendToWebhook({
             candidate_id: candidate.candidate_id,
             candidate_name: nama,
+            email: webhookEmail,
             job_id: candidate.job_id,
             job_title: jobData.title || posisi,
             job_description: jobData.description || '',
