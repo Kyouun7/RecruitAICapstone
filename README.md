@@ -290,12 +290,13 @@ curl -X POST http://localhost:5678/webhook/candidate \
   -d '{
     "candidate_id": "CND-TEST-001",
     "candidate_name": "Budi Santoso",
+    "email": "budi@test.com",
     "job_id": "J-AI-001",
     "job_title": "AI Engineer",
     "job_description": "LLM, Python, Machine Learning",
     "minimum_qualifications": "Python, TensorFlow, 2+ years ML experience",
     "threshold_score": 80,
-    "cv_path": "https://drive.google.com/file/d/YOUR_FILE_ID/view",
+    "cv_path": "https://drive.google.com/uc?export=download&id=YOUR_FILE_ID",
     "division": "AI Engineer"
   }'
 ```
@@ -312,9 +313,13 @@ Expected: `score` filled in, `status` changed to `accepted` or `rejected`.
 
 ---
 
-## Google Drive Setup (Optional)
+## Google Services Setup
 
-By default, CVs are saved locally in `backend/uploads/`. To store CVs on Google Drive instead:
+By default, CVs are saved locally in `backend/uploads/`. You can also use Google Drive for CV storage and Gmail for automated candidate emails.
+
+### Google Drive Setup
+
+To store CVs on Google Drive instead of local uploads:
 
 **Option A — Using JSON files (local dev):**
 1. Go to [Google Cloud Console](https://console.cloud.google.com)
@@ -338,6 +343,25 @@ GOOGLE_CLIENT_SECRET=your-client-secret
 GOOGLE_REFRESH_TOKEN=your-refresh-token
 GOOGLE_DRIVE_FOLDER_ID=your-folder-id
 ```
+
+---
+
+### Gmail Setup
+
+The workflow can send automated acceptance/rejection emails through Gmail. If you skipped the Google Drive setup, just create or select any Google Cloud project for Gmail only. If you already completed the Google Drive setup above, you may already have a Google Cloud project and OAuth 2.0 Desktop client ready to reuse.
+
+To enable Gmail notifications, open the same Google Cloud project and:
+
+1. Enable the **Gmail API**
+2. Reuse your existing **OAuth 2.0 Desktop credentials** if you already created them for Drive, or create a new desktop client if you skipped Drive or want separate credentials
+3. Complete the OAuth authorization flow so n8n can access the Gmail account for sending mail
+
+If your backend or n8n configuration uses environment variables for Gmail, add the required client ID, client secret, and refresh token values from the Google Cloud credentials you created or reused.
+
+Notes:
+- Use a dedicated Gmail account for automated notifications.
+- Make sure the account has permission to send mail through the OAuth client you configure.
+- If you rotate credentials, re-authorize the Gmail connection in n8n.
 
 ---
 
