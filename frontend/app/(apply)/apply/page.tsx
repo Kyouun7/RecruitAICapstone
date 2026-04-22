@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import ApplicationForm from '@/components/apply/ApplicationForm';
 import SuccessView from '@/components/apply/SuccessView';
 import api from '@/lib/axios';
@@ -21,9 +22,22 @@ interface FormErrors {
   agree?: string;
 }
 
-// ===== MAIN PAGE COMPONENT =====
-export default function ApplyPage() {
+interface JobData {
+  title: string;
+  location: string;
+  employment_type: string;
+  job_id: string;
+}
+
+function ApplyFormContent() {
+  const searchParams = useSearchParams();
+  const jobIdParam = searchParams.get('jobId');
+
   // --- State ---
+  const [job, setJob] = useState<JobData | null>(null);
+  const [isLoadingJob, setIsLoadingJob] = useState(true);
+  const [jobError, setJobError] = useState('');
+
   const [formData, setFormData] = useState<FormData>({
     fullName: '',
     email: '',
@@ -38,6 +52,27 @@ export default function ApplyPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // --- Fetch Job Data ---
+  useEffect(() => {
+    async function fetchJob() {
+      if (!jobIdParam) {
+        setJobError('URL tidak memiliki ID Pekerjaan (?jobId=...).');
+        setIsLoadingJob(false);
+        return;
+      }
+      try {
+        const res = await api.get(`/api/jobs/${jobIdParam}`);
+        setJob(res.data.data);
+      } catch (err: any) {
+        console.error('Failed to fetch job:', err);
+        setJobError('Pekerjaan yang Anda cari tidak ditemukan atau telah ditutup.');
+      } finally {
+        setIsLoadingJob(false);
+      }
+    }
+    fetchJob();
+  }, [jobIdParam]);
 
   // --- Handlers ---
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -123,7 +158,7 @@ export default function ApplyPage() {
 
   // --- Submit ---
   const handleSubmit = async () => {
-    if (!validate()) return;
+    if (!validate() || !job) return;
     setApiErrors([]);
     setIsSubmitting(true);
     
@@ -132,8 +167,9 @@ export default function ApplyPage() {
       payload.append('nama', formData.fullName);
       payload.append('email', formData.email);
       payload.append('telepon', formData.phone.replace(/\D/g, ''));
-      payload.append('posisi', 'Senior UX Designer'); 
-      payload.append('job_id', 'JOB-1234'); 
+      // Gunakan data aktual dari database
+      payload.append('posisi', job.title); 
+      payload.append('job_id', job.job_id || jobIdParam || ''); 
       if (formData.portfolio) {
         payload.append('portofolio', formData.portfolio);
       }
@@ -158,10 +194,8 @@ export default function ApplyPage() {
           setApiErrors([`Kesalahan server: ${error.response.status} ${error.response.statusText}`]);
         }
       } else if (error.request) {
-        // Request was made but no response received (Network error, CORS, or server down)
-        setApiErrors(['Gagal terhubung ke server. Pastikan backend aktif (Network/CORS error).', `Detail: ${error.message}`]);
+        setApiErrors(['Gagal terhubung ke server. Pastikan backend aktif.', `Detail: ${error.message}`]);
       } else {
-        // Something else happened
         setApiErrors([`Terjadi kesalahan: ${error.message}`]);
       }
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -176,72 +210,103 @@ export default function ApplyPage() {
     setAgreed(false);
   };
 
-  // ===== RENDER =====
-  return (
-    <div className="min-h-screen flex flex-col font-[family-name:var(--font-inter)] bg-background text-on-surface">
-
-      {/* ===== MAIN CONTENT ===== */}
-      <main className="flex-grow pt-32 pb-24 px-4 md:px-6">
-        <div className="max-w-2xl mx-auto">
-
-          {/* Header Section */}
-          <header className="text-center mb-12">
-            <h1 className="text-4xl md:text-5xl font-extrabold text-primary tracking-tight mb-2 font-[family-name:var(--font-manrope)]">
-              Senior UX Designer
-            </h1>
-            <p className="text-on-surface-variant font-medium flex items-center justify-center gap-2">
-              <span className="material-symbols-outlined text-base">location_on</span>
-              Jakarta, ID
-              <span className="text-outline-variant">•</span>
-              <span className="material-symbols-outlined text-base">work</span>
-              Full-time
-            </p>
-          </header>
-
-          {/* Conditional: Success or Form */}
-          {apiErrors.length > 0 && !isSuccess && (
-            <div className="mb-8 p-4 rounded-xl bg-error-container text-on-error-container border border-error/50 flex flex-col gap-2 shadow-sm animate-in fade-in zoom-in-95 transition-all">
-              <div className="flex items-center gap-2 font-bold mb-1">
-                <span className="material-symbols-outlined text-error">error</span>
-                Gagal Mengirim Lamaran
-              </div>
-              <ul className="list-disc list-inside text-sm pl-2 space-y-1">
-                {apiErrors.map((err, idx) => (
-                  <li key={idx}>{err}</li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          {isSuccess ? (
-            <SuccessView
-              formData={formData}
-              fileName={selectedFile?.name || ''}
-              onReset={handleReset}
-            />
-          ) : (
-            <ApplicationForm
-              formData={formData}
-              errors={errors}
-              selectedFile={selectedFile}
-              agreed={agreed}
-              isDragging={isDragging}
-              isSubmitting={isSubmitting}
-              fileInputRef={fileInputRef}
-              onInputChange={handleInputChange}
-              onDragOver={handleDragOver}
-              onDragLeave={handleDragLeave}
-              onDrop={handleDrop}
-              onFileSelect={() => fileInputRef.current?.click()}
-              onFileChange={handleFileChange}
-              onRemoveFile={removeFile}
-              onToggleAgree={toggleAgree}
-              onSubmit={handleSubmit}
-            />
-          )}
+  // --- Render Loading/Error States ---
+  if (isLoadingJob) {
+    return (
+      <div className="flex-grow flex items-center justify-center pt-32 pb-24">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+          <div className="text-primary font-bold animate-pulse">Memuat data pekerjaan...</div>
         </div>
-      </main>
+      </div>
+    );
+  }
 
+  if (jobError || !job) {
+    return (
+      <div className="flex-grow flex flex-col items-center justify-center pt-32 pb-24 text-center px-4">
+        <span className="material-symbols-outlined text-6xl text-error mb-4" style={{ fontVariationSettings: "'FILL' 1" }}>error</span>
+        <h2 className="text-2xl font-bold text-on-surface mb-2">Oops!</h2>
+        <p className="text-on-surface-variant max-w-md">{jobError}</p>
+      </div>
+    );
+  }
+
+  // ===== RENDER MAIN FORM =====
+  return (
+    <main className="flex-grow pt-32 pb-24 px-4 md:px-6">
+      <div className="max-w-2xl mx-auto">
+        {/* Header Section */}
+        <header className="text-center mb-12">
+          <h1 className="text-4xl md:text-5xl font-extrabold text-primary tracking-tight mb-2 font-headline">
+            {job.title}
+          </h1>
+          <p className="text-on-surface-variant font-medium flex items-center justify-center gap-2">
+            <span className="material-symbols-outlined text-base">location_on</span>
+            {job.location || 'Remote'}
+            <span className="text-outline-variant">•</span>
+            <span className="material-symbols-outlined text-base">work</span>
+            {job.employment_type || 'Full-time'}
+          </p>
+        </header>
+
+        {/* Conditional: Success or Form */}
+        {apiErrors.length > 0 && !isSuccess && (
+          <div className="mb-8 p-4 rounded-xl bg-error-container text-on-error-container border border-error/50 flex flex-col gap-2 shadow-sm animate-in fade-in zoom-in-95 transition-all">
+            <div className="flex items-center gap-2 font-bold mb-1">
+              <span className="material-symbols-outlined text-error">error</span>
+              Gagal Mengirim Lamaran
+            </div>
+            <ul className="list-disc list-inside text-sm pl-2 space-y-1">
+              {apiErrors.map((err, idx) => (
+                <li key={idx}>{err}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {isSuccess ? (
+          <SuccessView
+            formData={formData}
+            fileName={selectedFile?.name || ''}
+            onReset={handleReset}
+          />
+        ) : (
+          <ApplicationForm
+            formData={formData}
+            errors={errors}
+            selectedFile={selectedFile}
+            agreed={agreed}
+            isDragging={isDragging}
+            isSubmitting={isSubmitting}
+            fileInputRef={fileInputRef}
+            onInputChange={handleInputChange}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+            onFileSelect={() => fileInputRef.current?.click()}
+            onFileChange={handleFileChange}
+            onRemoveFile={removeFile}
+            onToggleAgree={toggleAgree}
+            onSubmit={handleSubmit}
+          />
+        )}
+      </div>
+    </main>
+  );
+}
+
+// ===== MAIN PAGE COMPONENT =====
+export default function ApplyPage() {
+  return (
+    <div className="min-h-screen flex flex-col font-body bg-background text-on-surface">
+      <Suspense fallback={
+        <div className="flex-grow flex items-center justify-center pt-32 pb-24">
+          <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+        </div>
+      }>
+        <ApplyFormContent />
+      </Suspense>
     </div>
   );
 }

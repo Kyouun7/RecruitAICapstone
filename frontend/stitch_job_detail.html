@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "inverse-surface": "#2e3132",
+                    "tertiary-fixed": "#ffdbca",
+                    "secondary-container": "#86f8c8",
+                    "tertiary-container": "#592300",
+                    "on-tertiary-fixed": "#341100",
+                    "on-surface-variant": "#43474f",
+                    "on-error": "#ffffff",
+                    "error": "#ba1a1a",
+                    "surface-container-lowest": "#ffffff",
+                    "surface-container-highest": "#e1e3e4",
+                    "on-secondary-container": "#007352",
+                    "on-primary-fixed": "#001b3c",
+                    "on-primary-fixed-variant": "#1f477b",
+                    "primary-fixed": "#d5e3ff",
+                    "error-container": "#ffdad6",
+                    "tertiary": "#381300",
+                    "primary-container": "#003366",
+                    "primary-fixed-dim": "#a7c8ff",
+                    "outline-variant": "#c3c6d1",
+                    "surface-container-high": "#e7e8e9",
+                    "primary": "#001e40",
+                    "on-surface": "#191c1d",
+                    "inverse-primary": "#a7c8ff",
+                    "surface-container-low": "#f3f4f5",
+                    "surface-variant": "#e1e3e4",
+                    "surface-dim": "#d9dadb",
+                    "outline": "#737780",
+                    "on-primary-container": "#799dd6",
+                    "secondary": "#006c4d",
+                    "on-tertiary-fixed-variant": "#723610",
+                    "on-secondary-fixed-variant": "#005139",
+                    "surface-bright": "#f8f9fa",
+                    "inverse-on-surface": "#f0f1f2",
+                    "background": "#f8f9fa",
+                    "on-primary": "#ffffff",
+                    "surface-container": "#edeeef",
+                    "secondary-fixed-dim": "#69dbad",
+                    "on-secondary": "#ffffff",
+                    "surface": "#f8f9fa",
+                    "on-tertiary-container": "#d8885c",
+                    "on-tertiary": "#ffffff",
+                    "on-secondary-fixed": "#002115",
+                    "tertiary-fixed-dim": "#ffb690",
+                    "surface-tint": "#3a5f94",
+                    "on-error-container": "#93000a",
+                    "on-background": "#191c1d",
+                    "secondary-fixed": "#86f8c8"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Manrope"],
+                    "body": ["Inter"],
+                    "label": ["Inter"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .font-manrope { font-family: 'Manrope', sans-serif; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .btn-primary { background: linear-gradient(135deg, #001e40 0%, #003366 100%); }
+    </style>
+</head>
+<body class="bg-background text-on-surface">
+<!-- Top Navigation (Shell Implementation) -->
+<nav class="fixed top-0 w-full z-50 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl shadow-sm dark:shadow-none">
+<div class="flex justify-between items-center w-full px-8 py-4 max-w-screen-2xl mx-auto">
+<div class="text-2xl font-bold bg-gradient-to-br from-blue-900 to-blue-700 bg-clip-text text-transparent font-manrope">RecruitAI</div>
+<div class="hidden md:flex gap-8 items-center">
+<a class="text-slate-500 dark:text-slate-400 font-medium hover:text-blue-700 transition-colors duration-300 font-manrope" href="#">Talent Pool</a>
+<a class="text-blue-900 dark:text-blue-200 border-b-2 border-blue-900 dark:border-blue-400 pb-1 font-manrope font-semibold" href="#">Job Board</a>
+<a class="text-slate-500 dark:text-slate-400 font-medium hover:text-blue-700 transition-colors duration-300 font-manrope" href="#">Analytics</a>
+<a class="text-slate-500 dark:text-slate-400 font-medium hover:text-blue-700 transition-colors duration-300 font-manrope" href="#">Settings</a>
+</div>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-outline cursor-pointer hover:text-primary transition-all active:scale-95">notifications</span>
+<img alt="Recruiter profile avatar" class="w-8 h-8 rounded-full border-2 border-surface-container-high" data-alt="Professional headshot of a corporate recruiter in a modern office setting with soft natural lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA7Xum66NoeYMYqi2BfCjbim_lOO4cLhY5N3P8uxypTKaGBPTaSA8jhpeSNGcCk6oDrchR1W8RLw9x3AE34GLKWnJLd_GlGVk6jeJWNq_v6-1LglUd8DJJZow8Oy6fml3EoGTbGh4PZBDJD0Mfh87pHPFT5hmsbS8TYkh90eD4drd0DeF6IweOJDOgucxO1_UGPS_gvrehKmFxArh4dGkJCGVT5ZnG5DBMcJJ7pI21POVCCtMqeHvw_KBOyr6223XZeVtxPsYFt-zqB"/>
+</div>
+</div>
+</nav>
+<main class="pt-24 pb-20 px-6 max-w-screen-2xl mx-auto">
+<!-- Breadcrumb -->
+<!-- Hero Header -->
+<header class="bg-surface-container-lowest rounded-xl p-8 mb-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 transition-all">
+<div class="flex items-start md:items-center gap-6">
+<div class="w-20 h-20 rounded-xl bg-surface-container-low flex items-center justify-center overflow-hidden">
+<img alt="RecruitAI Labs Logo" class="w-full h-full object-cover" data-alt="Abstract geometric logo in shades of blue representing technology and intelligence on a clean white background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAWDwQUxSnYyEsmNLMa2dHMnUoXQnMNw2aV_v2W1ZjJ5Z4oEZF2WBiN1PGHkb5Q61lcskQxKtaz8WsgRhz1bKE8EwfpX83gebgKc29ZmHQM5vSoMZQPv-3b9aGXDjVLiK5Y5uVEDyzymHYgeyBUJ_oGptdfCLS0GfGWkRe8uVPjXmX6gvTnelGdPjWQztPsSOmv3arIFeiB9B-VLJOdmGV6OKn3wiwmDJpVqSIir_PqFou_eRMp6SkTcGfxsDaDVH-gEvFI3FHpNNkq"/>
+</div>
+<div>
+<h1 class="text-3xl font-bold font-manrope text-primary tracking-tight mb-2">Senior Machine Learning Engineer</h1>
+<div class="flex flex-wrap items-center gap-x-4 gap-y-2">
+<span class="flex items-center gap-1 text-on-surface-variant font-medium">
+<span class="material-symbols-outlined text-sm">corporate_fare</span>
+                            RecruitAI Labs
+                        </span>
+<span class="flex items-center gap-1 text-on-surface-variant font-medium">
+<span class="material-symbols-outlined text-sm">location_on</span>
+                            Jakarta, ID
+                        </span>
+<div class="flex gap-2 ml-2">
+<span class="px-3 py-1 bg-secondary-container text-on-secondary-container rounded-full text-xs font-bold uppercase tracking-widest">Full-time</span>
+<span class="px-3 py-1 bg-secondary-container text-on-secondary-container rounded-full text-xs font-bold uppercase tracking-widest">Hybrid</span>
+</div>
+</div>
+</div>
+</div>
+<div class="hidden md:block">
+<button class="btn-primary text-white px-8 py-4 rounded-xl font-semibold shadow-sm hover:scale-105 transition-transform active:scale-95">
+                    Apply for this Job
+                </button>
+</div>
+</header>
+<!-- Content Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+<!-- Left Column: Main Info -->
+<div class="lg:col-span-8 space-y-12">
+<section>
+<h2 class="text-xl font-bold font-manrope text-primary mb-6 flex items-center gap-3">
+                        About the Role
+                    </h2>
+<div class="space-y-4 text-on-surface-variant leading-relaxed font-body">
+<p>
+                            As a Senior Machine Learning Engineer at RecruitAI Labs, you will lead the evolution of our proprietary talent-matching algorithms. Our mission is to redefine human capital through the lens of sophisticated NLP and predictive modeling, ensuring that the right talent finds the right opportunity with surgical precision.
+                        </p>
+<p>
+                            You will work within a cross-functional team of researchers and product engineers to design, build, and deploy large-scale machine learning systems. This role demands a deep understanding of Transformer architectures and LLM orchestration to power our next generation of recruiter tools.
+                        </p>
+</div>
+</section>
+<section>
+<h2 class="text-xl font-bold font-manrope text-primary mb-6">Key Responsibilities</h2>
+<ul class="space-y-4">
+<li class="flex items-start gap-3 text-on-surface-variant leading-relaxed">
+<span class="material-symbols-outlined text-secondary mt-1">check_circle</span>
+                            Architect and implement production-ready NLP models for semantic job-to-resume matching.
+                        </li>
+<li class="flex items-start gap-3 text-on-surface-variant leading-relaxed">
+<span class="material-symbols-outlined text-secondary mt-1">check_circle</span>
+                            Optimize model inference performance for real-time talent search and filtering applications.
+                        </li>
+<li class="flex items-start gap-3 text-on-surface-variant leading-relaxed">
+<span class="material-symbols-outlined text-secondary mt-1">check_circle</span>
+                            Lead data engineering efforts to create robust training pipelines from heterogeneous data sources.
+                        </li>
+<li class="flex items-start gap-3 text-on-surface-variant leading-relaxed">
+<span class="material-symbols-outlined text-secondary mt-1">check_circle</span>
+                            Mentor junior engineers and contribute to the internal ML ops framework.
+                        </li>
+</ul>
+</section>
+<section>
+<h2 class="text-xl font-bold font-manrope text-primary mb-6">Requirements &amp; Qualifications</h2>
+<ul class="space-y-4">
+<li class="flex items-start gap-3 text-on-surface-variant leading-relaxed">
+<span class="material-symbols-outlined text-primary mt-1">arrow_right</span>
+                            MS or PhD in Computer Science, AI, or a related quantitative field.
+                        </li>
+<li class="flex items-start gap-3 text-on-surface-variant leading-relaxed">
+<span class="material-symbols-outlined text-primary mt-1">arrow_right</span>
+                            Proven experience with PyTorch and deep learning frameworks in a production environment.
+                        </li>
+<li class="flex items-start gap-3 text-on-surface-variant leading-relaxed">
+<span class="material-symbols-outlined text-primary mt-1">arrow_right</span>
+                            Strong understanding of modern NLP techniques including BERT, GPT, and vector embeddings.
+                        </li>
+<li class="flex items-start gap-3 text-on-surface-variant leading-relaxed">
+<span class="material-symbols-outlined text-primary mt-1">arrow_right</span>
+                            Fluency in Python and experience with distributed computing (Spark, Dask).
+                        </li>
+</ul>
+</section>
+</div>
+<!-- Right Column: Sidebar -->
+<aside class="lg:col-span-4 lg:sticky lg:top-28 space-y-6">
+<div class="bg-surface-container-lowest rounded-xl p-8 shadow-sm">
+<div class="md:hidden mb-6">
+<button class="w-full btn-primary text-white py-4 rounded-xl font-semibold active:scale-95 transition-all">
+                            Apply Now
+                        </button>
+</div>
+<div class="space-y-8">
+<div class="flex items-center justify-between pb-4 border-b border-surface-container-high last:border-0 last:pb-0">
+<div>
+<p class="text-xs font-bold text-on-surface-variant uppercase tracking-widest mb-1">Experience</p>
+<p class="text-lg font-semibold text-primary">3-5 Years</p>
+</div>
+<span class="material-symbols-outlined text-on-primary-container">history_edu</span>
+</div>
+<div class="flex items-center justify-between pb-4 border-b border-surface-container-high last:border-0 last:pb-0">
+<div>
+<p class="text-xs font-bold text-on-surface-variant uppercase tracking-widest mb-1">Work Level</p>
+<p class="text-lg font-semibold text-primary">Senior</p>
+</div>
+<span class="material-symbols-outlined text-on-primary-container">trending_up</span>
+</div>
+<div class="flex items-center justify-between pb-4 border-b border-surface-container-high last:border-0 last:pb-0">
+<div>
+<p class="text-xs font-bold text-on-surface-variant uppercase tracking-widest mb-1">Salary Range</p>
+<p class="text-lg font-semibold text-primary">Rp 15M - 25M</p>
+</div>
+<span class="material-symbols-outlined text-on-primary-container">payments</span>
+</div>
+</div>
+<div class="mt-12 pt-8 border-t border-surface-container-high">
+<p class="text-sm font-bold text-primary mb-4">Share this position</p>
+<div class="flex gap-4">
+<button class="w-10 h-10 rounded-full bg-surface-container-low flex items-center justify-center text-primary hover:bg-primary hover:text-white transition-all">
+<span class="material-symbols-outlined text-[20px]">share</span>
+</button>
+<button class="w-10 h-10 rounded-full bg-surface-container-low flex items-center justify-center text-primary hover:bg-primary hover:text-white transition-all">
+<span class="material-symbols-outlined text-[20px]">link</span>
+</button>
+<button class="w-10 h-10 rounded-full bg-surface-container-low flex items-center justify-center text-primary hover:bg-primary hover:text-white transition-all">
+<span class="material-symbols-outlined text-[20px]">mail</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Recruiter Info Block (Extra Editorial Touch) -->
+<div class="bg-primary text-white rounded-xl p-8 overflow-hidden relative group">
+<div class="relative z-10">
+<h4 class="font-manrope font-bold text-lg mb-2">Have questions?</h4>
+<p class="text-on-primary-container text-sm leading-relaxed mb-6">Connect directly with our engineering recruitment lead for a confidential chat.</p>
+<div class="flex items-center gap-3">
+<img alt="Lead Recruiter" class="w-12 h-12 rounded-lg object-cover" data-alt="Close up of a friendly female professional in business casual attire smiling warmly" src="https://lh3.googleusercontent.com/aida-public/AB6AXuASW674huwhG_AtpAZy1bZzay11SN1cGI3cNVpqtKc-0MRytCYg-m21gTjrizZVHewlyC7ZrTEglajNJP2hRD5EqllTqvbLcOGN05WBuMSPi-Tib3njmyeW8xkvhf6rsThS2uOBdp3v7-EtkzTEutJcuu-9coLCd5O3fcWUE5baUp5tHstqoadYTYe7O4--QE9rdBf9iNXV_CR_0P1R4jGn0HBfB1zaxtIJUJBhsYo6tUHFkhkibeJb7_stRKHgVXQiX0z3_vAfXyjw"/>
+<div>
+<p class="font-bold text-sm">Amara Santoso</p>
+<p class="text-xs text-on-primary-container">Lead Tech Talent Partner</p>
+</div>
+</div>
+</div>
+<div class="absolute -bottom-4 -right-4 text-white opacity-5">
+<span class="material-symbols-outlined text-[120px]">smart_toy</span>
+</div>
+</div>
+</aside>
+</div>
+</main>
+<!-- Mobile Fixed Footer CTA -->
+<div class="md:hidden fixed bottom-0 left-0 w-full bg-white/95 backdrop-blur-md p-4 shadow-[0_-4px_24px_-4px_rgba(25,28,29,0.08)] z-50">
+<button class="w-full btn-primary text-white py-4 rounded-xl font-bold uppercase tracking-widest text-sm shadow-lg active:scale-[0.98]">
+            Apply for this Job
+        </button>
+</div>
+</body></html>

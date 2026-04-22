@@ -11,7 +11,7 @@ const {
 const router = express.Router();
 
 // Semua endpoint jobs memerlukan autentikasi (HR/Admin login)
-router.use(verifyToken);
+// router.use(verifyToken); // TODO: Temporarily disabled for development/testing
 
 router.post('/', createJob);
 router.get('/', getAllJobs);

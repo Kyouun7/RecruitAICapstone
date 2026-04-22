@@ -7,6 +7,7 @@ import BasicInformationCard from '@/components/create-job/BasicInformationCard';
 import RoleRequirementsCard from '@/components/create-job/RoleRequirementsCard';
 import AIConfigurationCard from '@/components/create-job/AIConfigurationCard';
 import StickyActionBar from '@/components/create-job/StickyActionBar';
+import api from '@/lib/axios';
 
 // ===== TYPES =====
 interface JobFormData {
@@ -72,10 +73,34 @@ export default function CreateJobPage() {
 
   const handlePublish = async () => {
     setIsSubmitting(true);
-    // TODO: integrate with backend
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    setIsSubmitting(false);
-    console.log('Published:', formData);
+    try {
+      const payload = {
+        title: formData.jobTitle,
+        employment_type: formData.employmentType,
+        work_setup: formData.workSetup,
+        location: formData.location,
+        description: formData.aboutRole,
+        key_responsibilities: formData.responsibilities,
+        minimum_qualifications: formData.qualifications,
+        threshold_score: formData.aiMatchScore
+      };
+
+      const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+
+      const response = await api.post('/api/jobs', payload, {
+        headers: {
+          Authorization: token ? `Bearer ${token}` : '',
+        }
+      });
+      
+      console.log('Published successfully:', response.data);
+      router.push('/dashboard');
+    } catch (error) {
+      console.error('Failed to publish job:', error);
+      alert('Failed to publish job. Please check your connection or login status.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (

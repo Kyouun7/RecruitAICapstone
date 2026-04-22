@@ -21,9 +21,18 @@ CREATE TABLE IF NOT EXISTS candidates (
 CREATE TABLE IF NOT EXISTS jobs (
     id INT AUTO_INCREMENT PRIMARY KEY,
     job_id VARCHAR(50) NOT NULL UNIQUE,
-    title VARCHAR(100) NOT NULL,
+    title VARCHAR(255) NOT NULL,
     description TEXT,
-    threshold_score INT DEFAULT 70
+    employment_type VARCHAR(50),
+    location VARCHAR(100),
+    work_setup VARCHAR(50),
+    key_responsibilities TEXT,
+    minimum_qualifications TEXT,
+    threshold_score INT DEFAULT 70,
+    is_active BOOLEAN DEFAULT TRUE,
+    created_by INT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
 INSERT INTO jobs (job_id, title, description, threshold_score) VALUES 
