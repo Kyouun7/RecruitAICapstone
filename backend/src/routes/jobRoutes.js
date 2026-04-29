@@ -3,6 +3,7 @@ const { verifyToken } = require('../middleware/auth');
 const {
     createJob,
     getAllJobs,
+    getMyJobs,
     getJobById,
     updateJob,
     deleteJob
@@ -10,13 +11,14 @@ const {
 
 const router = express.Router();
 
-// Semua endpoint jobs memerlukan autentikasi (HR/Admin login)
-// router.use(verifyToken); // TODO: Temporarily disabled for development/testing
+// === PROTECTED ROUTES (HR/Admin only) ===
+router.post('/', verifyToken, createJob);
+router.get('/hr/my-jobs', verifyToken, getMyJobs);
+router.put('/:id', verifyToken, updateJob);
+router.delete('/:id', verifyToken, deleteJob);
 
-router.post('/', createJob);
+// === PUBLIC ROUTES ===
 router.get('/', getAllJobs);
 router.get('/:id', getJobById);
-router.put('/:id', updateJob);
-router.delete('/:id', deleteJob);
 
 module.exports = router;

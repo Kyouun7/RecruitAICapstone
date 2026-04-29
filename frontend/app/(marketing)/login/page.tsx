@@ -1,7 +1,60 @@
+'use client';
+
+import { useState } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import api from '@/lib/axios';
 
 export default function LoginPage() {
+  const router = useRouter();
+  const [formData, setFormData] = useState({
+    email: '',
+    password: ''
+  });
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData(prev => ({
+      ...prev,
+      [e.target.name]: e.target.value
+    }));
+    setErrorMsg(''); // Clear error on change
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.email || !formData.password) {
+      setErrorMsg('Email dan password wajib diisi');
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const response = await api.post('/api/auth/login', formData);
+      const { token } = response.data;
+      
+      // Simpan token ke localStorage
+      if (token) {
+        localStorage.setItem('token', token);
+      }
+      
+      // Redirect ke dashboard
+      router.push('/dashboard');
+    } catch (error: any) {
+      console.error('Login error:', error);
+      if (error.response?.data?.message) {
+        setErrorMsg(error.response.data.message);
+      } else if (error.response?.data?.errors) {
+        setErrorMsg(error.response.data.errors.join(', '));
+      } else {
+        setErrorMsg('Terjadi kesalahan. Silakan coba lagi.');
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="flex-grow flex items-center justify-center w-full px-4 pt-20 pb-12 min-h-[calc(100vh-72px)]">
       <div className="w-full max-w-md">
@@ -10,7 +63,15 @@ export default function LoginPage() {
             <h2 className="text-3xl font-bold text-on-surface mb-2 tracking-tight font-headline">Welcome Back</h2>
             <p className="text-on-surface-variant font-body text-sm">Log in to manage your recruitment pipeline.</p>
           </div>
-          <form className="space-y-6">
+          
+          {errorMsg && (
+            <div className="mb-6 p-3 bg-error-container text-on-error-container text-sm rounded-lg flex items-center gap-2">
+              <span className="material-symbols-outlined text-error text-sm">error</span>
+              {errorMsg}
+            </div>
+          )}
+
+          <form className="space-y-6" onSubmit={handleSubmit}>
             <div className="space-y-2">
               <label 
                 className="block text-on-surface-variant font-label text-xs font-semibold uppercase tracking-wider" 
@@ -24,6 +85,9 @@ export default function LoginPage() {
                 name="email" 
                 placeholder="name@company.com" 
                 type="email"
+                value={formData.email}
+                onChange={handleChange}
+                required
               />
             </div>
             
@@ -38,14 +102,18 @@ export default function LoginPage() {
               </div>
               <div className="relative">
                 <input 
-                  className="w-full px-4 py-3 bg-surface-container-low rounded-lg border-none focus:ring-1 focus:ring-secondary focus:bg-surface-container-lowest transition-all font-body text-sm text-on-surface" 
+                  className="w-full px-4 py-3 bg-surface-container-low rounded-lg border-none focus:ring-1 focus:ring-secondary focus:bg-surface-container-lowest transition-all font-body text-sm text-on-surface pr-12" 
                   id="password" 
                   name="password" 
                   type="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  required
                 />
                 <button 
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-outline hover:text-on-surface transition-colors" 
                   type="button"
+                  tabIndex={-1}
                 >
                   <span className="material-symbols-outlined text-xl" style={{ fontVariationSettings: "'FILL' 0" }}>
                     visibility
@@ -70,10 +138,18 @@ export default function LoginPage() {
             </div>
             
             <button 
-              className="w-full bg-gradient-to-br from-[#001e40] to-[#003366] text-white font-semibold py-4 rounded-lg shadow-sm hover:opacity-90 active:scale-95 transition-all text-center" 
+              className="w-full bg-gradient-to-br from-[#001e40] to-[#003366] text-white font-semibold py-4 rounded-lg shadow-sm hover:opacity-90 active:scale-95 transition-all text-center flex justify-center items-center gap-2 disabled:opacity-70 disabled:active:scale-100" 
               type="submit"
+              disabled={isLoading}
             >
-              Log In
+              {isLoading ? (
+                <>
+                  <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+                  Logging in...
+                </>
+              ) : (
+                'Log In'
+              )}
             </button>
           </form>
           

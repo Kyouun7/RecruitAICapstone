@@ -22,22 +22,27 @@ interface Job {
 export default function DashboardPage() {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [stats, setStats] = useState({ totalCandidates: 0 });
 
   useEffect(() => {
-    const fetchJobs = async () => {
+    const fetchDashboardData = async () => {
       try {
-        const response = await api.get('/api/jobs');
+        // Karena ini route protected, interceptor di axios.ts akan otomatis menyisipkan token JWT dari localStorage
+        const response = await api.get('/api/jobs/hr/my-jobs');
         if (response.data && response.data.success) {
           setJobs(response.data.data);
+          if (response.data.stats) {
+            setStats({ totalCandidates: response.data.stats.total_candidates });
+          }
         }
       } catch (error) {
-        console.error('Failed to fetch jobs:', error);
+        console.error('Failed to fetch dashboard data:', error);
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchJobs();
+    fetchDashboardData();
   }, []);
 
   const formatDate = (dateString: string) => {
@@ -89,7 +94,7 @@ export default function DashboardPage() {
           </div>
           <div>
             <p className="text-on-surface-variant font-label text-xs uppercase tracking-wider mb-1">Total Candidates</p>
-            <h3 className="text-4xl font-headline font-bold text-on-surface">842</h3>
+            <h3 className="text-4xl font-headline font-bold text-on-surface">{isLoading ? '-' : stats.totalCandidates}</h3>
           </div>
         </div>
 

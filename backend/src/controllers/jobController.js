@@ -56,7 +56,7 @@ async function createJob(req, res) {
     }
 }
 
-// GET ALL JOBS
+// GET ALL JOBS (Public)
 async function getAllJobs(req, res) {
     try {
         console.log('Fetching all jobs...');
@@ -70,6 +70,38 @@ async function getAllJobs(req, res) {
         
     } catch (error) {
         console.error('Get jobs error:', error);
+        res.status(500).json({ success: false, message: 'Server error', error: error.message });
+    }
+}
+
+// GET MY JOBS (For Logged-in HR)
+async function getMyJobs(req, res) {
+    try {
+        const userId = req.user.user_id;
+        
+        // Fetch jobs specific to the logged-in user
+        const [jobs] = await db.execute('SELECT * FROM jobs WHERE created_by = ? ORDER BY id DESC', [userId]);
+        
+        // Fetch candidate count for these jobs
+        const [candidatesStats] = await db.execute(`
+            SELECT COUNT(c.id) as total_candidates 
+            FROM candidates c 
+            JOIN jobs j ON c.job_id = j.job_id 
+            WHERE j.created_by = ?
+        `, [userId]);
+        
+        const totalCandidates = candidatesStats[0].total_candidates || 0;
+        
+        res.status(200).json({
+            success: true,
+            data: jobs,
+            stats: {
+                total_candidates: totalCandidates
+            }
+        });
+        
+    } catch (error) {
+        console.error('Get my jobs error:', error);
         res.status(500).json({ success: false, message: 'Server error', error: error.message });
     }
 }
@@ -159,4 +191,4 @@ async function deleteJob(req, res) {
     }
 }
 
-module.exports = { createJob, getAllJobs, getJobById, updateJob, deleteJob };
+module.exports = { createJob, getAllJobs, getMyJobs, getJobById, updateJob, deleteJob };
