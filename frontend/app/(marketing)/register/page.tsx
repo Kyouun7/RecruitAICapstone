@@ -16,13 +16,11 @@ export default function RegisterPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [agreed, setAgreed] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData(prev => ({
-      ...prev,
-      [e.target.name]: e.target.value
-    }));
-    setErrorMsg(''); // Clear error on change
+    setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
+    setErrorMsg('');
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -35,21 +33,13 @@ export default function RegisterPage() {
       setErrorMsg('Semua kolom wajib diisi');
       return;
     }
-
     setIsLoading(true);
     try {
       const response = await api.post('/api/auth/register', formData);
       const { token } = response.data;
-      
-      // Simpan token ke localStorage
-      if (token) {
-        localStorage.setItem('token', token);
-      }
-      
-      // Redirect ke dashboard
+      if (token) localStorage.setItem('token', token);
       router.push('/dashboard');
     } catch (error: any) {
-      console.error('Register error:', error);
       if (error.response?.data?.message) {
         setErrorMsg(error.response.data.message);
       } else if (error.response?.data?.errors) {
@@ -62,187 +52,209 @@ export default function RegisterPage() {
     }
   };
 
-  // Helper untuk menentukan kekuatan password (visual saja)
-  const getPasswordStrength = () => {
-    const p = formData.password;
-    if (p.length === 0) return 0;
-    if (p.length < 8) return 1; // Weak
-    if (p.length >= 8 && /[A-Z]/.test(p) && /[0-9]/.test(p)) return 3; // Strong
-    return 2; // Medium
+  // Password strength — real detection
+  const getPasswordStrength = (p: string): { level: number; label: string; color: string } => {
+    if (p.length === 0) return { level: 0, label: '', color: '' };
+    
+    let score = 0;
+    if (p.length >= 8) score++;
+    if (p.length >= 12) score++;
+    if (/[A-Z]/.test(p)) score++;
+    if (/[0-9]/.test(p)) score++;
+    if (/[^A-Za-z0-9]/.test(p)) score++;
+
+    if (score <= 1) return { level: 1, label: 'Weak', color: '#ba1a1a' };
+    if (score <= 2) return { level: 2, label: 'Fair', color: '#e67e22' };
+    if (score <= 3) return { level: 3, label: 'Good', color: '#2980b9' };
+    return { level: 4, label: 'Strong', color: '#006c4d' };
   };
-  const strength = getPasswordStrength();
+
+  const strength = getPasswordStrength(formData.password);
 
   return (
-    <div className="relative flex-grow flex items-center justify-center w-full px-4 pt-20 pb-12 min-h-[calc(100vh-72px)] overflow-hidden">
-      {/* Background Decorative Elements (Asymmetric Layout) */}
-      <div className="fixed top-20 right-[-5%] w-[400px] h-[400px] bg-primary/5 rounded-full blur-[100px] -z-10 pointer-events-none"></div>
-      <div className="fixed bottom-[5%] left-[-5%] w-[300px] h-[300px] bg-secondary/5 rounded-full blur-[80px] -z-10 pointer-events-none"></div>
+    <div className="flex-grow flex items-center justify-center px-4 py-16 min-h-[calc(100vh-72px)]">
+      <div className="w-full max-w-md">
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-10">
 
-      <div className="w-full max-w-[480px]">
-        {/* Center Card */}
-        <section className="bg-surface-container-lowest rounded-xl p-8 md:p-12 shadow-[0_12px_32px_-4px_rgba(25,28,29,0.06)] border border-outline-variant/15 w-full">
-          <div className="mb-10 text-center md:text-left">
-            <h1 className="font-headline text-3xl font-bold text-primary mb-3">Create an Account</h1>
-            <p className="text-on-surface-variant font-body text-sm">Join innovative HR teams automating their screening process.</p>
+          {/* Title */}
+          <div className="mb-8">
+            <h1 className="text-2xl font-bold text-on-surface mb-1.5 tracking-tight">
+              Create an Account
+            </h1>
+            <p className="text-sm text-on-surface-variant">
+              Join innovative HR teams automating their screening process.
+            </p>
           </div>
-          
+
+          {/* Error */}
           {errorMsg && (
             <div className="mb-6 p-3 bg-error-container text-on-error-container text-sm rounded-lg flex items-center gap-2">
-              <span className="material-symbols-outlined text-error text-sm">error</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/>
+              </svg>
               {errorMsg}
             </div>
           )}
 
-          <form className="space-y-6" onSubmit={handleSubmit}>
-            {/* Name Field */}
-            <div className="space-y-2">
-              <label 
-                className="block font-label text-xs font-semibold uppercase tracking-wider text-on-surface-variant" 
-                htmlFor="full_name"
-              >
+          <form onSubmit={handleSubmit} className="space-y-5">
+
+            {/* Full Name */}
+            <div className="space-y-1.5">
+              <label htmlFor="full_name" className="block text-xs font-semibold text-on-surface-variant uppercase tracking-wider">
                 Full Name
               </label>
-              <input 
-                className="w-full px-4 py-3 bg-surface-container-low border-0 focus:ring-1 focus:ring-secondary focus:bg-surface-container-lowest rounded-lg transition-all outline-none text-on-surface text-sm" 
-                id="full_name" 
-                name="full_name"
-                placeholder="Enter your full name" 
-                type="text"
+              <input
+                id="full_name" name="full_name" type="text"
+                placeholder="Enter your full name"
                 value={formData.full_name}
                 onChange={handleChange}
                 required
+                className="w-full px-4 py-3 bg-[#f3f4f5] rounded-lg text-sm text-on-surface placeholder:text-outline-variant border-none outline-none focus:ring-2 focus:ring-primary/20 transition-all"
               />
             </div>
-            
-            {/* Company Field */}
-            <div className="space-y-2">
-              <label 
-                className="block font-label text-xs font-semibold uppercase tracking-wider text-on-surface-variant" 
-                htmlFor="company_name"
-              >
+
+            {/* Company Name */}
+            <div className="space-y-1.5">
+              <label htmlFor="company_name" className="block text-xs font-semibold text-on-surface-variant uppercase tracking-wider">
                 Company Name
               </label>
-              <input 
-                className="w-full px-4 py-3 bg-surface-container-low border-0 focus:ring-1 focus:ring-secondary focus:bg-surface-container-lowest rounded-lg transition-all outline-none text-on-surface text-sm" 
-                id="company_name" 
-                name="company_name"
-                placeholder="e.g. Sterling Architecture Ltd." 
-                type="text"
+              <input
+                id="company_name" name="company_name" type="text"
+                placeholder="e.g. Sterling Architecture Ltd."
                 value={formData.company_name}
                 onChange={handleChange}
                 required
+                className="w-full px-4 py-3 bg-[#f3f4f5] rounded-lg text-sm text-on-surface placeholder:text-outline-variant border-none outline-none focus:ring-2 focus:ring-primary/20 transition-all"
               />
             </div>
-            
-            {/* Email Field */}
-            <div className="space-y-2">
-              <label 
-                className="block font-label text-xs font-semibold uppercase tracking-wider text-on-surface-variant" 
-                htmlFor="email"
-              >
+
+            {/* Work Email */}
+            <div className="space-y-1.5">
+              <label htmlFor="email" className="block text-xs font-semibold text-on-surface-variant uppercase tracking-wider">
                 Work Email
               </label>
-              <input 
-                className="w-full px-4 py-3 bg-surface-container-low border-0 focus:ring-1 focus:ring-secondary focus:bg-surface-container-lowest rounded-lg transition-all outline-none text-on-surface text-sm" 
-                id="email" 
-                name="email"
-                placeholder="name@company.com" 
-                type="email"
+              <input
+                id="email" name="email" type="email"
+                placeholder="name@company.com"
                 value={formData.email}
                 onChange={handleChange}
                 required
+                className="w-full px-4 py-3 bg-[#f3f4f5] rounded-lg text-sm text-on-surface placeholder:text-outline-variant border-none outline-none focus:ring-2 focus:ring-primary/20 transition-all"
               />
             </div>
-            
-            {/* Password Field Group */}
-            <div className="space-y-2">
-              <label 
-                className="block font-label text-xs font-semibold uppercase tracking-wider text-on-surface-variant" 
-                htmlFor="password"
-              >
+
+            {/* Password */}
+            <div className="space-y-1.5">
+              <label htmlFor="password" className="block text-xs font-semibold text-on-surface-variant uppercase tracking-wider">
                 Password
               </label>
               <div className="relative">
-                <input 
-                  className="w-full px-4 py-3 bg-surface-container-low border-0 focus:ring-1 focus:ring-secondary focus:bg-surface-container-lowest rounded-lg transition-all outline-none text-on-surface pr-12 text-sm" 
-                  id="password" 
-                  name="password"
-                  placeholder="Min. 8 characters" 
-                  type="password"
+                <input
+                  id="password" name="password"
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder="Min. 8 characters"
                   value={formData.password}
                   onChange={handleChange}
                   required
+                  className="w-full px-4 py-3 bg-[#f3f4f5] rounded-lg text-sm text-on-surface placeholder:text-outline-variant border-none outline-none focus:ring-2 focus:ring-primary/20 transition-all pr-11"
                 />
-                <button 
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-primary transition-colors" 
+                <button
                   type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-outline hover:text-on-surface transition-colors"
                   tabIndex={-1}
                 >
-                  <span className="material-symbols-outlined text-xl" style={{ fontVariationSettings: "'FILL' 0" }}>visibility</span>
+                  {showPassword ? (
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+                      <line x1="1" x2="23" y1="1" y2="23"/>
+                    </svg>
+                  ) : (
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+                    </svg>
+                  )}
                 </button>
               </div>
-              
+
               {/* Strength Indicator */}
-              <div className="pt-2 flex gap-1 items-center">
-                <div className={`h-1 flex-1 rounded-full ${strength >= 1 ? 'bg-secondary' : 'bg-surface-container-highest'}`}></div>
-                <div className={`h-1 flex-1 rounded-full ${strength >= 2 ? 'bg-secondary' : 'bg-surface-container-highest'}`}></div>
-                <div className={`h-1 flex-1 rounded-full ${strength >= 3 ? 'bg-secondary' : 'bg-surface-container-highest'}`}></div>
-                <div className={`h-1 flex-1 rounded-full ${strength >= 4 ? 'bg-secondary' : 'bg-surface-container-highest'}`}></div>
-                <span className={`text-[10px] font-semibold uppercase ml-2 ${strength >= 3 ? 'text-secondary' : 'text-outline-variant'}`}>
-                  {strength === 0 ? '' : strength === 1 ? 'Weak' : strength === 2 ? 'Fair' : 'Strong'}
-                </span>
-              </div>
+              {formData.password.length > 0 && (
+                <div className="pt-1 flex gap-1 items-center">
+                  {[1, 2, 3, 4].map((bar) => (
+                    <div
+                      key={bar}
+                      className="h-1 flex-1 rounded-full transition-all duration-300"
+                      style={{
+                        background: strength.level >= bar ? strength.color : '#e1e3e4'
+                      }}
+                    />
+                  ))}
+                  <span
+                    className="text-[10px] font-bold uppercase ml-2 transition-all duration-300"
+                    style={{ color: strength.color }}
+                  >
+                    {strength.label}
+                  </span>
+                </div>
+              )}
             </div>
-            
-            {/* Consent Checkbox */}
-            <div className="flex items-start gap-3 py-2 cursor-pointer group" onClick={() => { setAgreed(!agreed); setErrorMsg(''); }}>
-              <div className="relative flex items-center pt-0.5">
-                <input 
-                  className="w-4 h-4 rounded border-outline-variant text-secondary focus:ring-secondary cursor-pointer" 
-                  id="terms" 
-                  type="checkbox"
-                  checked={agreed}
-                  readOnly
-                />
+
+            {/* Checkbox */}
+            <div
+              className="flex items-start gap-3 cursor-pointer"
+              onClick={() => { setAgreed(!agreed); setErrorMsg(''); }}
+            >
+              <div className={`w-4 h-4 mt-0.5 rounded border-2 flex items-center justify-center shrink-0 transition-all ${agreed ? 'bg-primary border-primary' : 'border-gray-300 bg-white'}`}>
+                {agreed && (
+                  <svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="2 6 5 9 10 3"/>
+                  </svg>
+                )}
               </div>
-              <label className="text-xs text-on-surface-variant leading-relaxed cursor-pointer" htmlFor="terms" onClick={(e) => e.preventDefault()}>
-                I agree to the <Link className="text-primary font-semibold hover:underline" href="#">Terms of Service</Link> and <Link className="text-primary font-semibold hover:underline" href="#">Privacy Policy</Link>
-              </label>
+              <span className="text-sm text-on-surface-variant leading-relaxed select-none">
+                I agree to the{' '}
+                <a href="#" onClick={e => e.stopPropagation()} className="font-semibold text-on-surface hover:underline">Terms of Service</a>
+                {' '}and{' '}
+                <a href="#" onClick={e => e.stopPropagation()} className="font-semibold text-on-surface hover:underline">Privacy Policy</a>
+              </span>
             </div>
-            
-            {/* Submit Button */}
-            <button 
-              className="w-full bg-gradient-to-br from-[#001e40] to-[#003366] text-white font-semibold py-4 rounded-lg shadow-lg hover:shadow-xl hover:opacity-95 transition-all transform active:scale-95 flex justify-center items-center gap-2 disabled:opacity-70 disabled:active:scale-100" 
+
+            {/* Submit */}
+            <button
               type="submit"
               disabled={isLoading}
+              className="w-full bg-gradient-to-br from-[#001e40] to-[#003366] text-white font-semibold py-3.5 rounded-lg shadow-sm hover:opacity-90 active:scale-[0.98] transition-all flex justify-center items-center gap-2 disabled:opacity-70"
             >
               {isLoading ? (
                 <>
-                  <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+                  <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"/>
                   Creating Account...
                 </>
-              ) : (
-                'Create Account'
-              )}
+              ) : 'Create Account'}
             </button>
           </form>
-          
-          {/* Footer Link */}
-          <div className="mt-10 pt-8 border-t border-outline-variant/15 text-center">
-            <p className="text-sm text-on-surface-variant">
-              Already have an account? 
-              <Link className="text-primary font-bold hover:underline ml-1 cursor-pointer" href="/login">
-                Log in
-              </Link>
-            </p>
-          </div>
-        </section>
-        
-        {/* Decorative Trust Badge */}
-        <div className="mt-8 flex justify-center items-center gap-6 opacity-40 grayscale hover:grayscale-0 hover:opacity-100 transition-all cursor-default">
-          <span className="material-symbols-outlined text-primary text-3xl" style={{ fontVariationSettings: "'FILL' 0" }}>verified_user</span>
-          <span className="material-symbols-outlined text-primary text-3xl" style={{ fontVariationSettings: "'FILL' 0" }}>encrypted</span>
-          <span className="material-symbols-outlined text-primary text-3xl" style={{ fontVariationSettings: "'FILL' 0" }}>cloud_done</span>
+
+          {/* Login link */}
+          <p className="mt-7 text-center text-sm text-on-surface-variant">
+            Already have an account?{' '}
+            <Link href="/login" className="font-bold text-primary hover:underline">
+              Log in
+            </Link>
+          </p>
+
+        </div>
+
+        {/* Trust badges */}
+        <div className="mt-8 flex justify-center items-center gap-6 opacity-40 hover:opacity-70 transition-all">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#003366" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          </svg>
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#003366" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+          </svg>
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#003366" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
         </div>
       </div>
     </div>
