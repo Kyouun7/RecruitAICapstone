@@ -192,10 +192,10 @@ export default function DashboardPage() {
       </div>
 
       {/* ===== MAIN CONTENT ===== */}
-      <div className="grid grid-cols-3 gap-6 mb-8">
+      <div className="mb-8">
 
         {/* Left: Recruitment Flow */}
-        <div className="col-span-2 bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
           <div className="flex items-center justify-between mb-6">
             <div>
               <h3 className="font-semibold text-on-surface text-lg">Recruitment Flow</h3>
@@ -246,40 +246,13 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Right: Upcoming Interviews */}
-        <div className="bg-primary rounded-xl p-5 text-white">
-          <div className="flex items-center justify-between mb-5">
-            <h3 className="font-semibold text-lg">Upcoming Interviews</h3>
-            <span className="material-symbols-outlined text-white/70">calendar_month</span>
-          </div>
+      </div>{/* end mb-8 left section */}
 
-          <div className="bg-white/10 rounded-xl p-4 mb-4 flex items-center gap-4">
-            <div className="text-center">
-              <p className="text-xs font-semibold text-white/70 uppercase">{new Date().toLocaleString('en-US', { month: 'short' }).toUpperCase()}</p>
-              <p className="text-4xl font-bold">{new Date().getDate()}</p>
-            </div>
-            <div>
-              <p className="font-semibold">Today's Schedule</p>
-              <p className="text-xs text-white/70">Coming soon</p>
-            </div>
-          </div>
-
-          <div className="bg-white/10 rounded-xl p-6 text-center">
-            <span className="material-symbols-outlined text-white/40 text-4xl">calendar_month</span>
-            <p className="text-sm text-white/60 mt-2">Interview scheduling coming soon</p>
-          </div>
-
-          <button className="w-full text-center text-sm text-white/80 hover:text-white mt-4 underline">
-            View Full Calendar
-          </button>
-        </div>
-      </div>
-
-      {/* ===== BOTTOM: Job Table + AI Insight ===== */}
-      <div className="grid grid-cols-3 gap-6">
+      {/* ===== Job Table + AI Insight ===== */}
+      <div>
 
         {/* Active Job Openings */}
-        <div className="col-span-2 bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+        <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
           <div className="px-6 py-5 border-b border-outline-variant/15 flex items-center justify-between">
             <h3 className="font-semibold text-on-surface text-lg">Active Job Openings</h3>
             <div className="flex items-center gap-3">
@@ -344,7 +317,7 @@ export default function DashboardPage() {
                         )}
                       </td>
                       <td className="px-6 py-4 text-right">
-                        <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div className="flex justify-end gap-1 transition-opacity">
                           <Link href={`/dashboard/${job.job_id}`}>
                             <button className="p-1.5 rounded-lg hover:bg-primary/10 text-on-surface-variant hover:text-primary transition-colors" title="Lihat Kandidat">
                               <span className="material-symbols-outlined text-sm">visibility</span>
@@ -374,37 +347,8 @@ export default function DashboardPage() {
             </table>
           </div>
         </div>
-
-        {/* AI Recruiter Insight */}
-        <div className="bg-primary rounded-xl p-6 text-white flex flex-col">
-          <div className="flex items-center gap-2 mb-4">
-            <div className="bg-white/20 rounded-full px-3 py-1 flex items-center gap-1.5">
-              <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>auto_awesome</span>
-              <span className="text-xs font-bold uppercase tracking-wider">AI Recruiter Insight</span>
-            </div>
-          </div>
-
-          <h3 className="text-xl font-bold mb-3">
-            {totalApplicants > 0 ? `${totalApplicants} Candidates in Pipeline` : 'No Candidates Yet'}
-          </h3>
-          <p className="text-sm text-white/80 leading-relaxed mb-6">
-            {totalApplicants > 0
-              ? `You have ${activeJobs} active job opening${activeJobs !== 1 ? 's' : ''} with ${totalApplicants} total candidate${totalApplicants !== 1 ? 's' : ''} in your pipeline. Keep reviewing to find the best match.`
-              : 'Start by creating a job opening and sharing it with candidates to begin building your pipeline.'}
-          </p>
-
-          <div className="bg-white/10 rounded-xl p-4 mt-auto">
-            <p className="text-xs font-bold uppercase tracking-wider text-white/60 mb-2">Recommended Action</p>
-            <p className="text-sm text-white/90 leading-relaxed">
-              {activeJobs === 0
-                ? 'Create your first job opening to start receiving applications.'
-                : `Review candidates for your ${activeJobs} active position${activeJobs !== 1 ? 's' : ''} to keep your hiring pipeline moving.`}
-            </p>
-          </div>
-        </div>
       </div>
 
-      {/* ===== FOOTER ===== */}
       <div className="mt-auto pt-10">
       <div className="pt-6 border-t border-gray-200 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-gray-500">
         <p className="font-semibold text-on-surface">RecruitAI</p>
