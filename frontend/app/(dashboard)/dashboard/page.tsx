@@ -71,7 +71,7 @@ export default function DashboardPage() {
   const interviewCount = Math.round(totalApplicants * 0.1);
   const offeredCount = Math.round(totalApplicants * 0.025);
   const flowStages = [
-    { label: 'Applied', count: totalApplicants, pct: 100, color: 'bg-primary' },
+    { label: 'Applied', count: totalApplicants, pct: totalApplicants > 0 ? 100 : 0, color: 'bg-primary' },
     { label: 'Screening', count: screeningCount, pct: totalApplicants > 0 ? 50 : 0, color: 'bg-primary' },
     { label: 'Interview', count: interviewCount, pct: totalApplicants > 0 ? 10 : 0, color: 'bg-primary' },
     { label: 'Offered', count: offeredCount, pct: totalApplicants > 0 ? 2.5 : 0, color: 'bg-[#2dd4bf]' },
@@ -107,7 +107,7 @@ export default function DashboardPage() {
       <div className="grid grid-cols-4 gap-4 mb-8">
 
         {/* Total Openings — REAL DATA */}
-        <div className="bg-surface-container-lowest p-5 rounded-xl border border-outline-variant/15">
+        <div className="bg-white p-5 rounded-xl border border-gray-100 shadow-sm">
           <div className="flex items-start justify-between mb-3">
             <div className="p-2.5 bg-surface-container-low rounded-lg">
               <span className="material-symbols-outlined text-primary text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>work</span>
@@ -124,7 +124,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Total Candidates — REAL DATA */}
-        <div className="bg-surface-container-lowest p-5 rounded-xl border border-outline-variant/15">
+        <div className="bg-white p-5 rounded-xl border border-gray-100 shadow-sm">
           <div className="flex items-start justify-between mb-3">
             <div className="p-2.5 bg-[#f0fdf4] rounded-lg">
               <span className="material-symbols-outlined text-[#16a34a] text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>group</span>
@@ -138,7 +138,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Hire Rate — belum ada API, tampilkan N/A */}
-        <div className="bg-surface-container-lowest p-5 rounded-xl border border-outline-variant/15">
+        <div className="bg-white p-5 rounded-xl border border-gray-100 shadow-sm">
           <div className="flex items-start justify-between mb-3">
             <div className="p-2.5 bg-secondary-container rounded-lg">
               <span className="material-symbols-outlined text-on-secondary-container text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>trending_up</span>
@@ -152,7 +152,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Interviews Today — belum ada API */}
-        <div className="bg-surface-container-lowest p-5 rounded-xl border border-outline-variant/15">
+        <div className="bg-white p-5 rounded-xl border border-gray-100 shadow-sm">
           <div className="flex items-start justify-between mb-3">
             <div className="p-2.5 bg-surface-container-low rounded-lg">
               <span className="material-symbols-outlined text-primary text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>event_available</span>
@@ -168,7 +168,7 @@ export default function DashboardPage() {
       <div className="grid grid-cols-3 gap-6 mb-8">
 
         {/* Left: Recruitment Flow */}
-        <div className="col-span-2 bg-surface-container-lowest rounded-xl border border-outline-variant/15 p-6">
+        <div className="col-span-2 bg-white rounded-xl border border-gray-100 shadow-sm p-6">
           <div className="flex items-center justify-between mb-6">
             <div>
               <h3 className="font-semibold text-on-surface text-lg">Recruitment Flow</h3>
@@ -252,7 +252,7 @@ export default function DashboardPage() {
       <div className="grid grid-cols-3 gap-6">
 
         {/* Active Job Openings */}
-        <div className="col-span-2 bg-surface-container-lowest rounded-xl border border-outline-variant/15 overflow-hidden">
+        <div className="col-span-2 bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
           <div className="px-6 py-5 border-b border-outline-variant/15 flex items-center justify-between">
             <h3 className="font-semibold text-on-surface text-lg">Active Job Openings</h3>
             <div className="flex items-center gap-3">
@@ -368,7 +368,7 @@ export default function DashboardPage() {
       {/* ===== FOOTER ===== */}
       <div className="mt-12 pt-6 border-t border-outline-variant/15 flex items-center justify-between text-xs text-on-surface-variant">
         <p className="font-semibold text-on-surface">RecruitAI</p>
-        <p>© 2026 RecruitAI. All rights reserved.</p>
+        <p>© 2024 RecruitAI. All rights reserved.</p>
         <div className="flex gap-4">
           <a href="#" className="hover:text-primary">Privacy Policy</a>
           <a href="#" className="hover:text-primary">Terms of Service</a>

@@ -91,3 +91,25 @@ async function createCandidate(req, res) {
 }
 
 module.exports = { createCandidate };
+
+async function getCandidatesByJob(req, res) {
+    try {
+        const { job_id } = req.query;
+
+        if (!job_id) {
+            return res.status(400).json({ success: false, message: 'job_id wajib diisi' });
+        }
+
+        const [candidates] = await db.execute(
+            'SELECT * FROM candidates WHERE job_id = ? ORDER BY score DESC, created_at DESC',
+            [job_id]
+        );
+
+        res.json({ success: true, data: candidates });
+    } catch (error) {
+        console.error('getCandidatesByJob error:', error);
+        res.status(500).json({ success: false, message: 'Server error', error: error.message });
+    }
+}
+
+module.exports = { createCandidate, getCandidatesByJob };

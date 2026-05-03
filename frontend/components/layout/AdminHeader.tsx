@@ -55,7 +55,7 @@ export default function AdminHeader() {
   const initial = user?.full_name ? user.full_name.charAt(0).toUpperCase() : 'U';
 
   return (
-    <header className="sticky top-0 z-40 w-full bg-surface-container-lowest border-b border-outline-variant/20 px-8 py-3 flex justify-between items-center h-16">
+    <header className="sticky top-0 z-40 w-full bg-white border-b border-gray-200 shadow-sm px-8 py-3 flex justify-between items-center h-16">
       {/* Left/Center Space */}
       <div className="flex-1 flex items-center gap-4">
         <Link href="/" className="text-xl font-bold text-primary font-headline tracking-tight">
@@ -99,7 +99,7 @@ export default function AdminHeader() {
 
         {/* Profile Dropdown Popup */}
         {isDropdownOpen && (
-          <div className="absolute top-12 right-0 mt-2 w-56 bg-surface-container-lowest border border-outline-variant/20 rounded-xl shadow-lg py-2 z-50 animate-in fade-in slide-in-from-top-2">
+          <div className="absolute top-12 right-0 mt-2 w-56 bg-white border border-gray-200 rounded-xl shadow-lg py-2 z-50 animate-in fade-in slide-in-from-top-2">
             <div className="px-4 py-3 border-b border-outline-variant/10">
               <p className="text-sm font-bold text-on-surface truncate">{user?.full_name || 'User'}</p>
               <p className="text-xs text-on-surface-variant truncate">{user?.email || 'email@example.com'}</p>
