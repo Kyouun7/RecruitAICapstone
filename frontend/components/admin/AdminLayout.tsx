@@ -8,10 +8,10 @@ interface AdminLayoutProps {
 
 export default function AdminLayout({ children }: AdminLayoutProps) {
   return (
-    <div className="min-h-screen" style={{ background: '#f0f2f5' }}>
+    <div className="flex min-h-[calc(100vh-64px)]">
       <AdminSidebar />
-      <main className="ml-64 pb-24 p-8 min-h-screen">
-        <div className="max-w-6xl mx-auto">{children}</div>
+      <main className="ml-64 flex-1 px-8 py-8 flex flex-col bg-gray-50">
+        <div className="max-w-5xl mx-auto w-full flex-1 flex flex-col">{children}</div>
       </main>
     </div>
   );

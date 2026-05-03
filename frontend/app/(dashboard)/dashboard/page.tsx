@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import AdminLayout from '@/components/admin/AdminLayout';
 import api from '@/lib/axios';
@@ -29,6 +30,32 @@ export default function DashboardPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [stats, setStats] = useState<Stats>({ totalCandidates: 0, totalJobs: 0 });
   const [activeTab, setActiveTab] = useState<'Week' | 'Month' | 'Year'>('Month');
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteTargetJob, setDeleteTargetJob] = useState<Job | null>(null);
+  const router = useRouter();
+
+  const handleDeleteClick = (job: Job) => {
+    setDeleteTargetJob(job);
+    setShowDeleteModal(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteTargetJob) return;
+    setDeletingId(deleteTargetJob.job_id);
+    try {
+      await api.delete(`/api/jobs/${deleteTargetJob.job_id}`);
+      setJobs((prev) => prev.filter((j) => j.job_id !== deleteTargetJob.job_id));
+      setStats((prev) => ({ ...prev, totalJobs: prev.totalJobs - 1 }));
+    } catch (error) {
+      console.error('Failed to delete job:', error);
+      alert('Gagal menghapus lowongan. Coba lagi.');
+    } finally {
+      setDeletingId(null);
+      setShowDeleteModal(false);
+      setDeleteTargetJob(null);
+    }
+  };
 
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -319,12 +346,24 @@ export default function DashboardPage() {
                       <td className="px-6 py-4 text-right">
                         <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                           <Link href={`/dashboard/${job.job_id}`}>
-                            <button className="p-1.5 rounded-lg hover:bg-surface-container-low text-on-surface-variant hover:text-primary">
+                            <button className="p-1.5 rounded-lg hover:bg-primary/10 text-on-surface-variant hover:text-primary transition-colors" title="Lihat Kandidat">
                               <span className="material-symbols-outlined text-sm">visibility</span>
                             </button>
                           </Link>
-                          <button className="p-1.5 rounded-lg hover:bg-surface-container-low text-on-surface-variant hover:text-primary">
-                            <span className="material-symbols-outlined text-sm">more_horiz</span>
+                          <Link href={`/dashboard/${job.job_id}/edit`}>
+                            <button className="p-1.5 rounded-lg hover:bg-primary/10 text-on-surface-variant hover:text-primary transition-colors" title="Edit Lowongan">
+                              <span className="material-symbols-outlined text-sm">edit</span>
+                            </button>
+                          </Link>
+                          <button
+                            onClick={() => handleDeleteClick(job)}
+                            disabled={deletingId === job.job_id}
+                            className="p-1.5 rounded-lg hover:bg-error-container text-on-surface-variant hover:text-error transition-colors disabled:opacity-50"
+                            title="Hapus Lowongan"
+                          >
+                            <span className="material-symbols-outlined text-sm">
+                              {deletingId === job.job_id ? 'hourglass_empty' : 'delete'}
+                            </span>
                           </button>
                         </div>
                       </td>
@@ -366,16 +405,78 @@ export default function DashboardPage() {
       </div>
 
       {/* ===== FOOTER ===== */}
-      <div className="mt-12 pt-6 border-t border-outline-variant/15 flex items-center justify-between text-xs text-on-surface-variant">
+      <div className="mt-auto pt-10">
+      <div className="pt-6 border-t border-gray-200 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-gray-500">
         <p className="font-semibold text-on-surface">RecruitAI</p>
-        <p>© 2024 RecruitAI. All rights reserved.</p>
+        <p>© 2026 RecruitAI. All rights reserved.</p>
         <div className="flex gap-4">
-          <a href="#" className="hover:text-primary">Privacy Policy</a>
-          <a href="#" className="hover:text-primary">Terms of Service</a>
-          <a href="#" className="hover:text-primary">Cookie Settings</a>
-          <a href="#" className="hover:text-primary">Contact Us</a>
+          <a href="#" className="hover:text-primary transition-colors">Privacy Policy</a>
+          <a href="#" className="hover:text-primary transition-colors">Terms of Service</a>
+          <a href="#" className="hover:text-primary transition-colors">Cookie Settings</a>
+          <a href="#" className="hover:text-primary transition-colors">Contact Us</a>
         </div>
       </div>
+      </div>
+
+      {/* DELETE CONFIRMATION MODAL */}
+      {showDeleteModal && deleteTargetJob && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div
+            className="absolute inset-0 bg-black/40 backdrop-blur-[2px]"
+            onClick={() => setShowDeleteModal(false)}
+          />
+          <div className="relative z-10 bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md mx-4">
+            <div className="flex items-center gap-4 mb-5">
+              <div className="w-12 h-12 rounded-full bg-error-container flex items-center justify-center flex-shrink-0">
+                <span
+                  className="material-symbols-outlined text-error text-[24px]"
+                  style={{ fontVariationSettings: "'FILL' 1" }}
+                >
+                  delete
+                </span>
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-on-surface">Hapus Lowongan?</h3>
+                <p className="text-sm text-on-surface-variant">Tindakan ini tidak bisa dibatalkan.</p>
+              </div>
+            </div>
+            <div className="bg-surface-container-low rounded-xl px-4 py-3 mb-4">
+              <p className="text-sm font-semibold text-on-surface">{deleteTargetJob.title}</p>
+              <p className="text-xs text-on-surface-variant mt-0.5">
+                {deleteTargetJob.employment_type} • {deleteTargetJob.location || 'Remote'}
+              </p>
+            </div>
+            <p className="text-sm text-on-surface-variant mb-6">
+              Semua data kandidat yang terkait dengan lowongan ini juga akan dihapus secara permanen.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowDeleteModal(false)}
+                className="flex-1 px-4 py-2.5 rounded-xl border border-outline-variant/30 text-on-surface text-sm font-medium hover:bg-surface-container-low transition-colors"
+              >
+                Batal
+              </button>
+              <button
+                onClick={handleDeleteConfirm}
+                disabled={!!deletingId}
+                className="flex-1 px-4 py-2.5 rounded-xl bg-error text-white text-sm font-semibold hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-60 flex items-center justify-center gap-2"
+              >
+                {deletingId ? (
+                  <>
+                    <span className="material-symbols-outlined text-[16px] animate-spin">autorenew</span>
+                    Menghapus...
+                  </>
+                ) : (
+                  <>
+                    <span className="material-symbols-outlined text-[16px]">delete</span>
+                    Ya, Hapus
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
     </AdminLayout>
   );

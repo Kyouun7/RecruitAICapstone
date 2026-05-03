@@ -8,6 +8,7 @@ import api from '@/lib/axios';
 export default function AdminHeader() {
   const router = useRouter();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   
   const [user, setUser] = useState<{
@@ -44,10 +45,13 @@ export default function AdminHeader() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const handleLogout = () => {
-    // Hapus token dari localStorage
+  const handleLogoutClick = () => {
+    setIsDropdownOpen(false);
+    setShowLogoutModal(true);
+  };
+
+  const handleLogoutConfirm = () => {
     localStorage.removeItem('token');
-    // Arahkan ke halaman login
     router.push('/login');
   };
 
@@ -55,7 +59,8 @@ export default function AdminHeader() {
   const initial = user?.full_name ? user.full_name.charAt(0).toUpperCase() : 'U';
 
   return (
-    <header className="sticky top-0 z-40 w-full bg-white border-b border-gray-200 shadow-sm px-8 py-3 flex justify-between items-center h-16">
+    <>
+    <header className="sticky top-0 z-40 w-full bg-white border-b border-gray-100 px-8 py-3 flex justify-between items-center h-16">
       {/* Left/Center Space */}
       <div className="flex-1 flex items-center gap-4">
         <Link href="/" className="text-xl font-bold text-primary font-headline tracking-tight">
@@ -99,27 +104,27 @@ export default function AdminHeader() {
 
         {/* Profile Dropdown Popup */}
         {isDropdownOpen && (
-          <div className="absolute top-12 right-0 mt-2 w-56 bg-white border border-gray-200 rounded-xl shadow-lg py-2 z-50 animate-in fade-in slide-in-from-top-2">
-            <div className="px-4 py-3 border-b border-outline-variant/10">
+          <div className="absolute top-12 right-0 mt-2 w-56 bg-white border border-gray-100 rounded-xl shadow-lg py-2 z-50 animate-in fade-in slide-in-from-top-2">
+            <div className="px-4 py-3 border-b border-gray-100">
               <p className="text-sm font-bold text-on-surface truncate">{user?.full_name || 'User'}</p>
               <p className="text-xs text-on-surface-variant truncate">{user?.email || 'email@example.com'}</p>
             </div>
             
             <div className="py-1">
-              <Link href="/dashboard/settings" className="flex items-center gap-3 px-4 py-2 text-sm text-on-surface hover:bg-surface-container-low transition-colors">
+              <Link
+                href="/dashboard/settings"
+                onClick={() => setIsDropdownOpen(false)}
+                className="flex items-center gap-3 px-4 py-2 text-sm text-on-surface hover:bg-gray-50 transition-colors"
+              >
                 <span className="material-symbols-outlined text-[18px]">person</span>
                 My Profile
               </Link>
-              <Link href="/dashboard/settings" className="flex items-center gap-3 px-4 py-2 text-sm text-on-surface hover:bg-surface-container-low transition-colors">
-                <span className="material-symbols-outlined text-[18px]">settings</span>
-                Account Settings
-              </Link>
             </div>
-            
-            <div className="border-t border-outline-variant/10 py-1 mt-1">
-              <button 
-                onClick={handleLogout}
-                className="w-full flex items-center gap-3 px-4 py-2 text-sm text-error hover:bg-error-container/50 transition-colors text-left"
+
+            <div className="border-t border-gray-100 py-1 mt-1">
+              <button
+                onClick={handleLogoutClick}
+                className="w-full flex items-center gap-3 px-4 py-2 text-sm text-error hover:bg-red-50 transition-colors text-left"
               >
                 <span className="material-symbols-outlined text-[18px]">logout</span>
                 Log Out
@@ -129,5 +134,56 @@ export default function AdminHeader() {
         )}
       </div>
     </header>
+
+      {/* LOGOUT CONFIRMATION MODAL */}
+      {showLogoutModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div
+            className="absolute inset-0 bg-black/40 backdrop-blur-[2px]"
+            onClick={() => setShowLogoutModal(false)}
+          />
+          <div className="relative z-10 bg-white rounded-2xl shadow-2xl p-8 w-full max-w-sm mx-4">
+            <div className="flex items-center gap-4 mb-5">
+              <div className="w-12 h-12 rounded-full bg-error-container flex items-center justify-center flex-shrink-0">
+                <span
+                  className="material-symbols-outlined text-error text-[24px]"
+                  style={{ fontVariationSettings: "'FILL' 1" }}
+                >
+                  logout
+                </span>
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-on-surface">Keluar dari RecruitAI?</h3>
+                <p className="text-sm text-on-surface-variant">Sesi kamu akan diakhiri.</p>
+              </div>
+            </div>
+            <div className="bg-gray-50 rounded-xl px-4 py-3 mb-6 flex items-center gap-3">
+              <div className="w-8 h-8 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center text-sm font-bold flex-shrink-0">
+                {initial}
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-on-surface">{user?.full_name}</p>
+                <p className="text-xs text-on-surface-variant">{user?.email}</p>
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowLogoutModal(false)}
+                className="flex-1 px-4 py-2.5 rounded-xl border border-gray-200 text-on-surface text-sm font-medium hover:bg-gray-50 transition-colors"
+              >
+                Batal
+              </button>
+              <button
+                onClick={handleLogoutConfirm}
+                className="flex-1 px-4 py-2.5 rounded-xl bg-error text-white text-sm font-semibold hover:opacity-90 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+              >
+                <span className="material-symbols-outlined text-[16px]">logout</span>
+                Ya, Keluar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }

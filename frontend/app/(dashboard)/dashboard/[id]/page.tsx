@@ -488,6 +488,7 @@ export default function JobDetailPage() {
     <AdminLayout>
 
       {/* JOB HEADER */}
+      <div className="pt-2">
       <div className="flex items-center justify-between mb-8">
         <div>
           {job ? (
@@ -532,6 +533,109 @@ export default function JobDetailPage() {
           </a>
         </div>
       </div>
+
+      {/* JOB DETAIL SECTION */}
+      {job && (
+        <div className="grid grid-cols-3 gap-6 mb-8">
+          {/* Left: Job Info */}
+          <div className="col-span-2 space-y-5">
+            {/* About the Role */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+              <div className="flex items-center gap-2 mb-3">
+                <span className="material-symbols-outlined text-primary text-[20px]">description</span>
+                <h3 className="font-bold text-on-surface text-base">About the Role</h3>
+              </div>
+              <p className="text-sm text-on-surface-variant leading-relaxed whitespace-pre-line">
+                {job.description}
+              </p>
+            </div>
+
+            {/* Key Responsibilities */}
+            {job.key_responsibilities && (
+              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="material-symbols-outlined text-primary text-[20px]">checklist</span>
+                  <h3 className="font-bold text-on-surface text-base">Key Responsibilities</h3>
+                </div>
+                <ul className="space-y-2">
+                  {job.key_responsibilities.split('\n').filter(Boolean).map((item, i) => (
+                    <li key={i} className="flex items-start gap-2 text-sm text-on-surface-variant">
+                      <span className="material-symbols-outlined text-[#006c4d] text-[16px] mt-0.5 flex-shrink-0" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
+                      <span>{item.replace(/^[-•*]\s*/, '')}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {/* Minimum Qualifications */}
+            {job.minimum_qualifications && (
+              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="material-symbols-outlined text-primary text-[20px]">school</span>
+                  <h3 className="font-bold text-on-surface text-base">Minimum Qualifications</h3>
+                </div>
+                <ul className="space-y-2">
+                  {job.minimum_qualifications.split('\n').filter(Boolean).map((item, i) => (
+                    <li key={i} className="flex items-start gap-2 text-sm text-on-surface-variant">
+                      <span className="material-symbols-outlined text-primary text-[16px] mt-0.5 flex-shrink-0">arrow_right</span>
+                      <span>{item.replace(/^[-•*]\s*/, '')}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+
+          {/* Right: Job Meta */}
+          <div className="space-y-4">
+            {/* Job Info Card */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+              <div className="flex items-center gap-2 mb-4">
+                <span className="material-symbols-outlined text-primary text-[20px]">info</span>
+                <h3 className="font-bold text-on-surface text-base">Job Information</h3>
+              </div>
+              <div className="space-y-4">
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mb-1">Employment Type</p>
+                  <p className="text-sm font-semibold text-on-surface flex items-center gap-1.5">
+                    <span className="material-symbols-outlined text-[16px] text-primary">work</span>
+                    {job.employment_type}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mb-1">Work Setup</p>
+                  <p className="text-sm font-semibold text-on-surface flex items-center gap-1.5">
+                    <span className="material-symbols-outlined text-[16px] text-primary">laptop_mac</span>
+                    {job.work_setup}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mb-1">Location</p>
+                  <p className="text-sm font-semibold text-on-surface flex items-center gap-1.5">
+                    <span className="material-symbols-outlined text-[16px] text-primary">location_on</span>
+                    {job.location || 'Remote'}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mb-1">Status</p>
+                  <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold ${job.is_active ? 'bg-[#f0fdf4] text-[#006c4d]' : 'bg-error-container text-on-error-container'}`}>
+                    <span className={`w-1.5 h-1.5 rounded-full ${job.is_active ? 'bg-[#006c4d]' : 'bg-error'}`} />
+                    {job.is_active ? 'Open' : 'Closed'}
+                  </span>
+                </div>
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mb-1">Posted</p>
+                  <p className="text-sm font-semibold text-on-surface">
+                    {new Date(job.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      )}
 
       {/* STATS ROW */}
       <div className="grid grid-cols-3 gap-5 mb-8">
@@ -811,6 +915,8 @@ export default function JobDetailPage() {
             </span>
           </div>
         )}
+      </div>
+
       </div>
 
       {/* CV DRAWER */}
