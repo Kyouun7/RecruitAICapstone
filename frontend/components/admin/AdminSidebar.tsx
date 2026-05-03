@@ -18,7 +18,7 @@ export default function AdminSidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="fixed left-0 top-16 h-[calc(100vh-64px)] w-64 bg-slate-50 flex flex-col p-4 space-y-2">
+    <aside className="fixed left-0 top-16 h-[calc(100vh-64px)] w-64 bg-white border-r border-gray-100 flex flex-col p-4 space-y-2">
       {/* Branding */}
       <div className="px-3 py-4 mb-4">
         <h2 className="font-headline font-bold text-primary text-lg">
@@ -41,11 +41,11 @@ export default function AdminSidebar() {
               href={item.href}
               className={`
                 flex items-center gap-3 px-4 py-3 rounded-lg
-                transition-transform duration-150 hover:translate-x-1
+                transition-all duration-150
                 ${
                   isActive
-                    ? 'bg-white text-primary shadow-sm font-medium'
-                    : 'text-slate-600'
+                    ? 'bg-primary/10 text-primary font-semibold'
+                    : 'text-slate-600 hover:bg-gray-50 hover:text-primary'
                 }
               `}
             >
@@ -62,12 +62,7 @@ export default function AdminSidebar() {
       <div className="p-2 mt-auto">
         <Link
           href="/dashboard/create"
-          className="
-            w-full block text-center bg-gradient-to-br from-primary to-[#003366cc]
-            text-white py-3 rounded-lg font-headline font-semibold
-            active:scale-95 duration-150 shadow-sm
-            hover:shadow-md transition-all
-          "
+          className="w-full block text-center bg-gradient-to-br from-primary to-[#003366cc] text-white py-3 rounded-lg font-headline font-semibold active:scale-95 duration-150 shadow-sm hover:shadow-md transition-all"
         >
           + Post a Job
         </Link>
