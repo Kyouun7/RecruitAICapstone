@@ -11,10 +11,6 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { icon: 'dashboard', label: 'Dashboard', href: '/dashboard' },
-  { icon: 'work', label: 'Jobs', href: '/dashboard/create' },
-  { icon: 'group', label: 'Applicants', href: '/dashboard/applicants' },
-  { icon: 'calendar_today', label: 'Calendar', href: '/dashboard/calendar' },
-  { icon: 'bar_chart', label: 'Reports', href: '/dashboard/reports' },
   { icon: 'settings', label: 'Settings', href: '/dashboard/settings' },
 ];
 
@@ -73,7 +69,7 @@ export default function AdminSidebar() {
             hover:shadow-md transition-all
           "
         >
-          Post a Job
+          + Post a Job
         </Link>
       </div>
     </aside>
