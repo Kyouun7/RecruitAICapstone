@@ -292,7 +292,7 @@ export default function DashboardPage() {
                   jobs.map((job) => (
                     <tr key={job.id} className="hover:bg-surface-container-high transition-colors group">
                       <td className="px-6 py-4">
-                        <Link href={`/jobs/${job.job_id}`} className="font-medium text-on-surface hover:text-primary transition-colors">
+                        <Link href={`/dashboard/${job.job_id}`} className="font-medium text-on-surface hover:text-primary transition-colors">
                           {job.title}
                         </Link>
                         <div className="text-xs text-on-surface-variant mt-0.5">
@@ -318,7 +318,7 @@ export default function DashboardPage() {
                       </td>
                       <td className="px-6 py-4 text-right">
                         <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <Link href={`/jobs/${job.job_id}`}>
+                          <Link href={`/dashboard/${job.job_id}`}>
                             <button className="p-1.5 rounded-lg hover:bg-surface-container-low text-on-surface-variant hover:text-primary">
                               <span className="material-symbols-outlined text-sm">visibility</span>
                             </button>
