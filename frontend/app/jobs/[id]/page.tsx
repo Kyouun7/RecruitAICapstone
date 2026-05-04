@@ -41,15 +41,6 @@ export default async function JobDetailPage({ params }: { params: Promise<{ id: 
       <div className="bg-gradient-to-br from-[#001e40] via-[#002a5c] to-[#003366] pt-24 pb-16 px-6">
         <div className="max-w-5xl mx-auto">
 
-          {/* Breadcrumb */}
-          <div className="flex items-center gap-2 text-white/50 text-xs mb-8">
-            <Link href="/" className="hover:text-white/80 transition-colors">Home</Link>
-            <span>/</span>
-            <span className="text-white/70">Jobs</span>
-            <span>/</span>
-            <span className="text-white/90 font-medium">{job.title}</span>
-          </div>
-
           {/* Job Header */}
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-8">
             <div className="flex items-start gap-5">
