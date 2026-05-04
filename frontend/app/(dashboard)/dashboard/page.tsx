@@ -17,6 +17,7 @@ interface Job {
   work_setup: string;
   is_active: number;
   created_at: string;
+  candidate_count?: number;
 }
 
 interface Stats {
@@ -35,7 +36,8 @@ export default function DashboardPage() {
   const [deleteTargetJob, setDeleteTargetJob] = useState<Job | null>(null);
   const router = useRouter();
 
-  const handleDeleteClick = (job: Job) => {
+  const handleDeleteClick = (e: React.MouseEvent, job: Job) => {
+    e.stopPropagation();
     setDeleteTargetJob(job);
     setShowDeleteModal(true);
   };
@@ -62,10 +64,30 @@ export default function DashboardPage() {
       try {
         const response = await api.get('/api/jobs/hr/my-jobs');
         if (response.data && response.data.success) {
-          setJobs(response.data.data);
+          const jobsData: Job[] = response.data.data;
+
+          // Fetch candidate count per job
+          const jobsWithCandidates = await Promise.all(
+            jobsData.map(async (job) => {
+              try {
+                const candRes = await api.get(`/api/candidates?job_id=${job.job_id}`);
+                const count = candRes.data?.data?.length || 0;
+                return { ...job, candidate_count: count };
+              } catch {
+                return { ...job, candidate_count: 0 };
+              }
+            })
+          );
+
+          setJobs(jobsWithCandidates);
+
+          const totalCands = jobsWithCandidates.reduce(
+            (sum, j) => sum + (j.candidate_count || 0),
+            0
+          );
           setStats({
-            totalJobs: response.data.data.length,
-            totalCandidates: response.data.stats?.total_candidates || 0,
+            totalJobs: jobsWithCandidates.length,
+            totalCandidates: response.data.stats?.total_candidates || totalCands,
           });
         }
       } catch (error) {
@@ -93,17 +115,6 @@ export default function DashboardPage() {
   startOfWeek.setHours(0, 0, 0, 0);
   const jobsThisWeek = jobs.filter(j => new Date(j.created_at) >= startOfWeek).length;
 
-  // Recruitment flow — Applied pakai data real, sisanya estimasi karena belum ada API per-stage
-  const screeningCount = Math.round(totalApplicants * 0.5);
-  const interviewCount = Math.round(totalApplicants * 0.1);
-  const offeredCount = Math.round(totalApplicants * 0.025);
-  const flowStages = [
-    { label: 'Applied', count: totalApplicants, pct: totalApplicants > 0 ? 100 : 0, color: 'bg-primary' },
-    { label: 'Screening', count: screeningCount, pct: totalApplicants > 0 ? 50 : 0, color: 'bg-primary' },
-    { label: 'Interview', count: interviewCount, pct: totalApplicants > 0 ? 10 : 0, color: 'bg-primary' },
-    { label: 'Offered', count: offeredCount, pct: totalApplicants > 0 ? 2.5 : 0, color: 'bg-[#2dd4bf]' },
-  ];
-
   return (
     <AdminLayout>
 
@@ -130,8 +141,8 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* ===== METRIC CARDS ===== */}
-      <div className="grid grid-cols-4 gap-4 mb-8">
+      {/* ===== METRIC CARDS — hanya 2 card ===== */}
+      <div className="grid grid-cols-2 gap-4 mb-8">
 
         {/* Total Openings — REAL DATA */}
         <div className="bg-white p-5 rounded-xl border border-gray-100 shadow-sm">
@@ -150,108 +161,23 @@ export default function DashboardPage() {
           <div className="mt-3 h-1 bg-primary rounded-full" style={{ width: activeJobs > 0 ? '75%' : '0%' }}></div>
         </div>
 
-        {/* Total Candidates — REAL DATA */}
+        {/* Total Pendaftar — jumlah kandidat yang mendaftar */}
         <div className="bg-white p-5 rounded-xl border border-gray-100 shadow-sm">
           <div className="flex items-start justify-between mb-3">
             <div className="p-2.5 bg-[#f0fdf4] rounded-lg">
               <span className="material-symbols-outlined text-[#16a34a] text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>group</span>
             </div>
           </div>
-          <p className="text-xs text-on-surface-variant uppercase tracking-wider font-semibold mb-1">Total Candidates</p>
+          <p className="text-xs text-on-surface-variant uppercase tracking-wider font-semibold mb-1">Total Pendaftar</p>
           <p className="text-4xl font-bold text-on-surface">{isLoading ? '-' : totalApplicants.toLocaleString()}</p>
           {totalApplicants > 0 && (
-            <p className="text-xs text-[#16a34a] mt-2">Exceeding quarterly target</p>
+            <p className="text-xs text-[#16a34a] mt-2">Total kandidat yang telah mendaftar</p>
           )}
-        </div>
-
-        {/* Hire Rate — belum ada API, tampilkan N/A */}
-        <div className="bg-white p-5 rounded-xl border border-gray-100 shadow-sm">
-          <div className="flex items-start justify-between mb-3">
-            <div className="p-2.5 bg-secondary-container rounded-lg">
-              <span className="material-symbols-outlined text-on-secondary-container text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>trending_up</span>
-            </div>
-          </div>
-          <p className="text-xs text-on-surface-variant uppercase tracking-wider font-semibold mb-1">Hire Rate</p>
-          <p className="text-4xl font-bold text-on-surface">
-            {isLoading ? '-' : totalApplicants > 0 ? `${((offeredCount / totalApplicants) * 100).toFixed(1)}%` : '0%'}
-          </p>
-          <p className="text-xs text-on-surface-variant mt-2">Estimated from pipeline</p>
-        </div>
-
-        {/* Interviews Today — belum ada API */}
-        <div className="bg-white p-5 rounded-xl border border-gray-100 shadow-sm">
-          <div className="flex items-start justify-between mb-3">
-            <div className="p-2.5 bg-surface-container-low rounded-lg">
-              <span className="material-symbols-outlined text-primary text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>event_available</span>
-            </div>
-          </div>
-          <p className="text-xs text-on-surface-variant uppercase tracking-wider font-semibold mb-1">Interviews Today</p>
-          <p className="text-4xl font-bold text-on-surface">—</p>
-          <p className="text-xs text-on-surface-variant mt-2 italic">Coming soon</p>
         </div>
       </div>
 
-      {/* ===== MAIN CONTENT ===== */}
-      <div className="mb-8">
-
-        {/* Left: Recruitment Flow */}
-        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h3 className="font-semibold text-on-surface text-lg">Recruitment Flow</h3>
-              <p className="text-xs text-on-surface-variant">Candidate conversion by stage</p>
-            </div>
-            <button className="text-primary text-sm font-medium flex items-center gap-1 hover:underline">
-              Details <span className="material-symbols-outlined text-sm">arrow_forward</span>
-            </button>
-          </div>
-
-          <div className="space-y-5">
-            {flowStages.map((stage) => (
-              <div key={stage.label}>
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-sm font-medium text-on-surface">{stage.label}</span>
-                  <span className="text-sm text-on-surface-variant">{stage.count.toLocaleString()} Candidates</span>
-                </div>
-                <div className="h-8 bg-surface-container-low rounded-lg overflow-hidden">
-                  {stage.pct > 0 ? (
-                    <div
-                      className={`h-full ${stage.color} rounded-lg flex items-center px-3 transition-all duration-700`}
-                      style={{ width: `${stage.pct}%` }}
-                    >
-                      <span className="text-white text-xs font-bold">{stage.pct}%</span>
-                    </div>
-                  ) : (
-                    <div className="h-full flex items-center px-3">
-                      <span className="text-on-surface-variant text-xs">No data</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Bottom stats */}
-          <div className="grid grid-cols-3 gap-4 mt-8 pt-6 border-t border-outline-variant/15">
-            {[
-              { label: 'Application Dropoff', value: totalApplicants > 0 ? `${(100 - (screeningCount / totalApplicants * 100)).toFixed(1)}%` : '—' },
-              { label: 'Interview Success Rate', value: screeningCount > 0 ? `${((interviewCount / screeningCount) * 100).toFixed(1)}%` : '—' },
-              { label: 'Offer Acceptance', value: '—' },
-            ].map(stat => (
-              <div key={stat.label} className="text-center">
-                <p className="text-xs text-on-surface-variant uppercase tracking-wider mb-1">{stat.label}</p>
-                <p className="text-2xl font-bold text-on-surface">{stat.value}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-
-      </div>{/* end mb-8 left section */}
-
-      {/* ===== Job Table + AI Insight ===== */}
+      {/* ===== Job Table ===== */}
       <div>
-
-        {/* Active Job Openings */}
         <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
           <div className="px-6 py-5 border-b border-outline-variant/15 flex items-center justify-between">
             <h3 className="font-semibold text-on-surface text-lg">Active Job Openings</h3>
@@ -270,7 +196,7 @@ export default function DashboardPage() {
                 <tr className="bg-surface-container-low text-on-surface-variant text-xs uppercase tracking-wider border-b border-outline-variant/15">
                   <th className="px-6 py-3 font-semibold">Job Title</th>
                   <th className="px-6 py-3 font-semibold">Date Posted</th>
-                  <th className="px-6 py-3 font-semibold">Candidates</th>
+                  <th className="px-6 py-3 font-semibold">Pendaftar</th>
                   <th className="px-6 py-3 font-semibold">Status</th>
                   <th className="px-6 py-3 font-semibold text-right">Action</th>
                 </tr>
@@ -290,11 +216,15 @@ export default function DashboardPage() {
                   </tr>
                 ) : (
                   jobs.map((job) => (
-                    <tr key={job.id} className="hover:bg-surface-container-high transition-colors group">
+                    <tr
+                      key={job.id}
+                      onClick={() => router.push(`/dashboard/${job.job_id}`)}
+                      className="hover:bg-surface-container-high transition-colors group cursor-pointer"
+                    >
                       <td className="px-6 py-4">
-                        <Link href={`/dashboard/${job.job_id}`} className="font-medium text-on-surface hover:text-primary transition-colors">
+                        <span className="font-medium text-on-surface group-hover:text-primary transition-colors">
                           {job.title}
-                        </Link>
+                        </span>
                         <div className="text-xs text-on-surface-variant mt-0.5">
                           {job.employment_type} • {job.location || 'Remote'}
                         </div>
@@ -302,7 +232,7 @@ export default function DashboardPage() {
                       <td className="px-6 py-4 text-on-surface-variant">{formatDate(job.created_at)}</td>
                       <td className="px-6 py-4">
                         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-surface-container-low text-on-surface">
-                          0 Applied
+                          {job.candidate_count ?? 0} Pendaftar
                         </span>
                       </td>
                       <td className="px-6 py-4">
@@ -317,19 +247,22 @@ export default function DashboardPage() {
                         )}
                       </td>
                       <td className="px-6 py-4 text-right">
-                        <div className="flex justify-end gap-1 transition-opacity">
-                          <Link href={`/dashboard/${job.job_id}`}>
-                            <button className="p-1.5 rounded-lg hover:bg-primary/10 text-on-surface-variant hover:text-primary transition-colors" title="Lihat Kandidat">
-                              <span className="material-symbols-outlined text-sm">visibility</span>
-                            </button>
-                          </Link>
+                        <div
+                          className="flex justify-end gap-1"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          {/* Edit */}
                           <Link href={`/dashboard/${job.job_id}/edit`}>
-                            <button className="p-1.5 rounded-lg hover:bg-primary/10 text-on-surface-variant hover:text-primary transition-colors" title="Edit Lowongan">
+                            <button
+                              className="p-1.5 rounded-lg hover:bg-primary/10 text-on-surface-variant hover:text-primary transition-colors"
+                              title="Edit Lowongan"
+                            >
                               <span className="material-symbols-outlined text-sm">edit</span>
                             </button>
                           </Link>
+                          {/* Delete */}
                           <button
-                            onClick={() => handleDeleteClick(job)}
+                            onClick={(e) => handleDeleteClick(e, job)}
                             disabled={deletingId === job.job_id}
                             className="p-1.5 rounded-lg hover:bg-error-container text-on-surface-variant hover:text-error transition-colors disabled:opacity-50"
                             title="Hapus Lowongan"
@@ -350,16 +283,16 @@ export default function DashboardPage() {
       </div>
 
       <div className="mt-auto pt-10">
-      <div className="pt-6 border-t border-gray-200 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-gray-500">
-        <p className="font-semibold text-on-surface">RecruitAI</p>
-        <p>© 2026 RecruitAI. All rights reserved.</p>
-        <div className="flex gap-4">
-          <a href="#" className="hover:text-primary transition-colors">Privacy Policy</a>
-          <a href="#" className="hover:text-primary transition-colors">Terms of Service</a>
-          <a href="#" className="hover:text-primary transition-colors">Cookie Settings</a>
-          <a href="#" className="hover:text-primary transition-colors">Contact Us</a>
+        <div className="pt-6 border-t border-gray-200 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-gray-500">
+          <p className="font-semibold text-on-surface">RecruitAI</p>
+          <p>© 2026 RecruitAI. All rights reserved.</p>
+          <div className="flex gap-4">
+            <a href="#" className="hover:text-primary transition-colors">Privacy Policy</a>
+            <a href="#" className="hover:text-primary transition-colors">Terms of Service</a>
+            <a href="#" className="hover:text-primary transition-colors">Cookie Settings</a>
+            <a href="#" className="hover:text-primary transition-colors">Contact Us</a>
+          </div>
         </div>
-      </div>
       </div>
 
       {/* DELETE CONFIRMATION MODAL */}
