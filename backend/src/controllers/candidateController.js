@@ -1,3 +1,5 @@
+const fs = require('fs');
+const path = require('path');
 const { uploadCVToGoogleDrive } = require('../services/googleDriveService');
 const { saveCandidate } = require('../services/dbService');
 const { sendToWebhook } = require('../services/webhookService');
@@ -5,14 +7,12 @@ const { isValidEmail, isValidPhone } = require('../utils/helpers');
 const db = require('../db/connection');
 
 async function createCandidate(req, res) {
-    console.log('Controller DIPANGGIL!');
-    console.log('File:', req.file);
+    console.log(' Controller DIPANGGIL!');
+    console.log(' File:', req.file);
     console.log('Body:', req.body);
-
     try {
         const { nama, email, telepon, portofolio, posisi, job_id } = req.body;
         const file = req.file;
-
         const errors = [];
         if (!nama) errors.push('Nama wajib diisi');
         if (!email) errors.push('Email wajib diisi');
@@ -22,94 +22,87 @@ async function createCandidate(req, res) {
         if (!posisi) errors.push('Posisi wajib diisi');
         if (!job_id) errors.push('Job ID wajib diisi');
         if (!file) errors.push('File CV wajib diupload');
-
-        if (errors.length > 0) {
-            return res.status(400).json({ success: false, errors });
-        }
-
-        console.log('Memanggil uploadCVToGoogleDrive...');
+        if (errors.length > 0) return res.status(400).json({ success: false, errors });
+        console.log('Uploading CV to Google Drive for:', nama);
         const uploadResult = await uploadCVToGoogleDrive(file, nama);
-        console.log('Hasil upload:', uploadResult);
-
-        const candidate = await saveCandidate({
-            nama, email, telepon, portofolio: portofolio || null, posisi, job_id,
-            cv_google_drive_id: uploadResult.fileId,
-            cv_original_name: file.originalname,
-            cv_url: uploadResult.url
-        });
-
-        // Fetch job details to enrich the webhook payload
-        let jobData = {};
-        try {
-            const [jobs] = await db.execute('SELECT * FROM jobs WHERE job_id = ?', [job_id]);
-            if (jobs.length > 0) jobData = jobs[0];
-        } catch (err) {
-            console.log('[Webhook] Could not fetch job details:', err.message);
-        }
-
-        let webhookEmail = candidate.email || email || '';
-        if (!webhookEmail) {
-            try {
-                const [rows] = await db.execute(
-                    'SELECT email FROM candidates WHERE candidate_id = ? LIMIT 1',
-                    [candidate.candidate_id]
-                );
-                webhookEmail = rows[0]?.email || '';
-            } catch (err) {
-                console.log('[Webhook] Could not fetch candidate email:', err.message);
-            }
-        }
-
-        if (!webhookEmail) {
-            throw new Error('Candidate email is required before sending webhook');
-        }
-
-        sendToWebhook({
-            candidate_id: candidate.candidate_id,
-            candidate_name: nama,
-            email: webhookEmail,
-            job_id: candidate.job_id,
-            job_title: jobData.title || posisi,
-            job_description: jobData.description || '',
-            key_responsibilities: jobData.key_responsibilities || '',
-            minimum_qualifications: jobData.minimum_qualifications || '',
-            threshold_score: jobData.threshold_score || 70,
-            cv_path: uploadResult.url,
-            division: posisi
-        });
-
-        res.status(201).json({
-            success: true,
-            message: 'Lamaran berhasil dikirim',
-            data: candidate
-        });
-
+        const candidate = await saveCandidate({ nama, email, telepon, portofolio: portofolio || null, posisi, job_id, cv_google_drive_id: uploadResult.fileId, cv_original_name: file.originalname, cv_url: uploadResult.url });
+        console.log(' PAYLOAD ke n8n:', { candidate_id: candidate.candidate_id, job_id: candidate.job_id, cv_path: uploadResult.url, division: candidate.posisi, nama: candidate.nama, email: candidate.email });
+        sendToWebhook({ candidate_id: candidate.candidate_id, candidate_name: candidate.nama, email: candidate.email, job_id: candidate.job_id, cv_path: uploadResult.url, division: candidate.posisi });
+        res.status(201).json({ success: true, message: 'Lamaran berhasil dikirim', data: candidate });
     } catch (error) {
-        console.error('Error:', error);
+        console.error(' Error:', error);
         res.status(500).json({ success: false, message: 'Server error', error: error.message });
     }
 }
 
-module.exports = { createCandidate };
-
-async function getCandidatesByJob(req, res) {
+async function getAllCandidates(req, res) {
     try {
-        const { job_id } = req.query;
-
-        if (!job_id) {
-            return res.status(400).json({ success: false, message: 'job_id wajib diisi' });
-        }
-
-        const [candidates] = await db.execute(
-            'SELECT * FROM candidates WHERE job_id = ? ORDER BY score DESC, created_at DESC',
-            [job_id]
-        );
-
-        res.json({ success: true, data: candidates });
+        const { status, job_id, search, sort, page = 1, limit = 10 } = req.query;
+        const offset = (parseInt(page) - 1) * parseInt(limit);
+        let whereClause = 'WHERE 1=1';
+        const params = [];
+        if (status) { whereClause += ' AND status = ?'; params.push(status); }
+        if (job_id) { whereClause += ' AND job_id = ?'; params.push(job_id); }
+        if (search) { whereClause += ' AND (nama LIKE ? OR email LIKE ?)'; params.push(`%${search}%`, `%${search}%`); }
+        const [countResult] = await db.query(`SELECT COUNT(*) as total FROM candidates ${whereClause}`, params);
+        const total = countResult[0].total;
+        let orderBy = 'ORDER BY created_at DESC';
+        if (sort === 'score') orderBy = 'ORDER BY score DESC';
+        const [candidates] = await db.query(`SELECT * FROM candidates ${whereClause} ${orderBy} LIMIT ? OFFSET ?`, [...params, parseInt(limit), offset]);
+        res.status(200).json({ success: true, data: candidates, pagination: { page: parseInt(page), limit: parseInt(limit), total, totalPages: Math.ceil(total / parseInt(limit)) } });
     } catch (error) {
-        console.error('getCandidatesByJob error:', error);
+        console.error('Get candidates error:', error);
         res.status(500).json({ success: false, message: 'Server error', error: error.message });
     }
 }
 
-module.exports = { createCandidate, getCandidatesByJob };
+async function getCandidateById(req, res) {
+    try {
+        const { id } = req.params;
+        const [candidates] = await db.execute('SELECT * FROM candidates WHERE candidate_id = ? OR id = ?', [id, id]);
+        if (candidates.length === 0) return res.status(404).json({ success: false, message: 'Kandidat tidak ditemukan' });
+        res.status(200).json({ success: true, data: candidates[0] });
+    } catch (error) {
+        console.error('Get candidate error:', error);
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+}
+
+async function updateCandidateStatus(req, res) {
+    try {
+        const { id } = req.params;
+        const { status, score, justifikasi, extracted_text } = req.body;
+        const validStatus = ['pending', 'processing', 'processed', 'accepted', 'rejected'];
+        if (!status || !validStatus.includes(status)) {
+            return res.status(400).json({ success: false, message: 'Status tidak valid' });
+        }
+        const [existing] = await db.execute('SELECT * FROM candidates WHERE candidate_id = ? OR id = ?', [id, id]);
+        if (existing.length === 0) return res.status(404).json({ success: false, message: 'Kandidat tidak ditemukan' });
+        
+        await db.execute(
+            'UPDATE candidates SET status = ?, score = COALESCE(?, score), justifikasi = COALESCE(?, justifikasi), extracted_text = COALESCE(?, extracted_text) WHERE candidate_id = ? OR id = ?',
+            [status, score, justifikasi, extracted_text, id, id]
+        );
+        res.status(200).json({ success: true, message: `Status kandidat berhasil diubah menjadi ${status}`, data: { id, status, score, justifikasi } });
+    } catch (error) {
+        console.error('Update candidate status error:', error);
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+}
+
+async function addRecruiterNote(req, res) {
+    try {
+        const { id } = req.params;
+        const { note } = req.body;
+        if (!note) return res.status(400).json({ success: false, message: 'Note wajib diisi' });
+        const [existing] = await db.execute('SELECT * FROM candidates WHERE candidate_id = ? OR id = ?', [id, id]);
+        if (existing.length === 0) return res.status(404).json({ success: false, message: 'Kandidat tidak ditemukan' });
+        await db.execute('UPDATE candidates SET recruiter_note = ? WHERE candidate_id = ? OR id = ?', [note, id, id]);
+        res.json({ success: true, message: 'Catatan berhasil ditambahkan' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+}
+
+module.exports = { createCandidate, getAllCandidates, getCandidateById, updateCandidateStatus, addRecruiterNote };

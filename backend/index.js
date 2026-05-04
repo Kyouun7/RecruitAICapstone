@@ -1,11 +1,11 @@
+const express = require('express');
+const path = require('path');
+const dotenv = require('dotenv');
+const cors = require('cors');
+const candidateRoutes = require('./src/routes/candidateRoutes');
 const authRoutes = require('./src/routes/authRoutes');
 const jobRoutes = require('./src/routes/jobRoutes');
 const n8nRoutes = require('./src/routes/n8nRoutes');
-const express = require('express');
-const cors = require('cors');
-const path = require('path');
-const dotenv = require('dotenv');
-const candidateRoutes = require('./src/routes/candidateRoutes');
 const db = require('./src/db/connection');
 
 dotenv.config();
@@ -13,19 +13,24 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// CORS - izinkan frontend akses
 app.use(cors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:3001',
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    origin: ['http://localhost:3001', 'http://localhost:3000', 'http://127.0.0.1:3001', 'https://recruitai-peach.vercel.app'],
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization']
 }));
+
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+app.use('/api', candidateRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/jobs', jobRoutes);
 app.use('/api/n8n', n8nRoutes);
-app.use(express.urlencoded({ extended: true }));
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-app.use('/api', candidateRoutes);
-
+const dashboardRoutes = require('./src/routes/dashboardRoutes');
+app.use('/api/dashboard', dashboardRoutes);
 app.get('/health', async (req, res) => {
     try {
         await db.query('SELECT 1');
@@ -40,7 +45,7 @@ app.get('/', (req, res) => {
 });
 
 app.listen(PORT, () => {
-    console.log(` RecruitAi Server running on http://localhost:${PORT}`);
+    console.log(`RecruitAi Server running on http://localhost:${PORT}`);
 });
 
 app.use((err, req, res, next) => {

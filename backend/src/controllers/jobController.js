@@ -10,98 +10,32 @@ function generateJobId() {
 // CREATE JOB
 async function createJob(req, res) {
     try {
-        const {
-            title,
-            description,
-            employment_type,
-            location,
-            work_setup,
-            key_responsibilities,
-            minimum_qualifications,
-            threshold_score
-        } = req.body;
-        
+        const { title, description, employment_type, location, work_setup, key_responsibilities, minimum_qualifications, threshold_score } = req.body;
         const user = req.user;
-        
-        if (!title || !description) {
-            return res.status(400).json({ success: false, message: 'Title dan description wajib diisi' });
-        }
-        
+        if (!title || !description) return res.status(400).json({ success: false, message: 'Title dan description wajib diisi' });
         const jobId = generateJobId();
-        
-        const query = `INSERT INTO jobs (
-            job_id, title, description, employment_type, location, 
-            work_setup, key_responsibilities, minimum_qualifications, 
-            threshold_score, is_active, created_by
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
-        
-        const values = [
-            jobId, title, description, employment_type || 'Full-time',
-            location || null, work_setup || 'Office',
-            key_responsibilities || null, minimum_qualifications || null,
-            threshold_score || 70, true, user?.user_id || null
-        ];
-        
-        await db.execute(query, values);
-        
-        res.status(201).json({
-            success: true,
-            message: 'Lowongan berhasil dibuat',
-            data: { job_id: jobId, title }
-        });
-        
+        await db.execute(`INSERT INTO jobs (job_id, title, description, employment_type, location, work_setup, key_responsibilities, minimum_qualifications, threshold_score, is_active, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [jobId, title, description, employment_type || 'Full-time', location || null, work_setup || 'Office', key_responsibilities || null, minimum_qualifications || null, threshold_score || 70, true, user?.user_id || null]);
+        res.status(201).json({ success: true, message: 'Lowongan berhasil dibuat', data: { job_id: jobId, title } });
     } catch (error) {
         console.error('Create job error:', error);
         res.status(500).json({ success: false, message: 'Server error', error: error.message });
     }
 }
 
-// GET ALL JOBS (Public)
+// GET ALL JOBS (with total candidates)
 async function getAllJobs(req, res) {
     try {
-        console.log('Fetching all jobs...');
-        const [jobs] = await db.query('SELECT * FROM jobs ORDER BY id DESC');
-        console.log(`Found ${jobs.length} jobs`);
-        
-        res.status(200).json({
-            success: true,
-            data: jobs
-        });
-        
+        const [jobs] = await db.query(`
+            SELECT j.*, COUNT(c.id) as total_candidates 
+            FROM jobs j 
+            LEFT JOIN candidates c ON j.job_id = c.job_id 
+            GROUP BY j.job_id
+            ORDER BY j.id DESC
+        `);
+        res.status(200).json({ success: true, data: jobs });
     } catch (error) {
         console.error('Get jobs error:', error);
-        res.status(500).json({ success: false, message: 'Server error', error: error.message });
-    }
-}
-
-// GET MY JOBS (For Logged-in HR)
-async function getMyJobs(req, res) {
-    try {
-        const userId = req.user.user_id;
-        
-        // Fetch jobs specific to the logged-in user
-        const [jobs] = await db.execute('SELECT * FROM jobs WHERE created_by = ? ORDER BY id DESC', [userId]);
-        
-        // Fetch candidate count for these jobs
-        const [candidatesStats] = await db.execute(`
-            SELECT COUNT(c.id) as total_candidates 
-            FROM candidates c 
-            JOIN jobs j ON c.job_id = j.job_id 
-            WHERE j.created_by = ?
-        `, [userId]);
-        
-        const totalCandidates = candidatesStats[0].total_candidates || 0;
-        
-        res.status(200).json({
-            success: true,
-            data: jobs,
-            stats: {
-                total_candidates: totalCandidates
-            }
-        });
-        
-    } catch (error) {
-        console.error('Get my jobs error:', error);
         res.status(500).json({ success: false, message: 'Server error', error: error.message });
     }
 }
@@ -110,18 +44,9 @@ async function getMyJobs(req, res) {
 async function getJobById(req, res) {
     try {
         const { id } = req.params;
-        
         const [jobs] = await db.execute('SELECT * FROM jobs WHERE job_id = ? OR id = ?', [id, id]);
-        
-        if (jobs.length === 0) {
-            return res.status(404).json({ success: false, message: 'Lowongan tidak ditemukan' });
-        }
-        
-        res.status(200).json({
-            success: true,
-            data: jobs[0]
-        });
-        
+        if (jobs.length === 0) return res.status(404).json({ success: false, message: 'Lowongan tidak ditemukan' });
+        res.status(200).json({ success: true, data: jobs[0] });
     } catch (error) {
         console.error('Get job error:', error);
         res.status(500).json({ success: false, message: 'Server error' });
@@ -133,35 +58,15 @@ async function updateJob(req, res) {
     try {
         const { id } = req.params;
         const updates = req.body;
-        
         const [existing] = await db.execute('SELECT * FROM jobs WHERE job_id = ? OR id = ?', [id, id]);
-        if (existing.length === 0) {
-            return res.status(404).json({ success: false, message: 'Lowongan tidak ditemukan' });
-        }
-        
+        if (existing.length === 0) return res.status(404).json({ success: false, message: 'Lowongan tidak ditemukan' });
         const allowedFields = ['title', 'description', 'employment_type', 'location', 'work_setup', 'key_responsibilities', 'minimum_qualifications', 'threshold_score', 'is_active'];
-        const fields = [];
-        const values = [];
-        
-        for (const field of allowedFields) {
-            if (updates[field] !== undefined) {
-                fields.push(`${field} = ?`);
-                values.push(updates[field]);
-            }
-        }
-        
-        if (fields.length === 0) {
-            return res.status(400).json({ success: false, message: 'Tidak ada field yang diupdate' });
-        }
-        
+        const fields = []; const values = [];
+        for (const field of allowedFields) if (updates[field] !== undefined) { fields.push(`${field} = ?`); values.push(updates[field]); }
+        if (fields.length === 0) return res.status(400).json({ success: false, message: 'Tidak ada field yang diupdate' });
         values.push(id, id);
         await db.execute(`UPDATE jobs SET ${fields.join(', ')} WHERE job_id = ? OR id = ?`, values);
-        
-        res.status(200).json({
-            success: true,
-            message: 'Lowongan berhasil diupdate'
-        });
-        
+        res.status(200).json({ success: true, message: 'Lowongan berhasil diupdate' });
     } catch (error) {
         console.error('Update job error:', error);
         res.status(500).json({ success: false, message: 'Server error' });
@@ -172,23 +77,14 @@ async function updateJob(req, res) {
 async function deleteJob(req, res) {
     try {
         const { id } = req.params;
-        
         const [existing] = await db.execute('SELECT * FROM jobs WHERE job_id = ? OR id = ?', [id, id]);
-        if (existing.length === 0) {
-            return res.status(404).json({ success: false, message: 'Lowongan tidak ditemukan' });
-        }
-        
+        if (existing.length === 0) return res.status(404).json({ success: false, message: 'Lowongan tidak ditemukan' });
         await db.execute('DELETE FROM jobs WHERE job_id = ? OR id = ?', [id, id]);
-        
-        res.status(200).json({
-            success: true,
-            message: 'Lowongan berhasil dihapus'
-        });
-        
+        res.status(200).json({ success: true, message: 'Lowongan berhasil dihapus' });
     } catch (error) {
         console.error('Delete job error:', error);
         res.status(500).json({ success: false, message: 'Server error' });
     }
 }
 
-module.exports = { createJob, getAllJobs, getMyJobs, getJobById, updateJob, deleteJob };
+module.exports = { createJob, getAllJobs, getJobById, updateJob, deleteJob };

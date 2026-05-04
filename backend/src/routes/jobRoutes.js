@@ -3,7 +3,6 @@ const { verifyToken } = require('../middleware/auth');
 const {
     createJob,
     getAllJobs,
-    getMyJobs,
     getJobById,
     updateJob,
     deleteJob
@@ -11,14 +10,13 @@ const {
 
 const router = express.Router();
 
-// === PROTECTED ROUTES (HR/Admin only) ===
+//  PUBLIC: siapa pun bisa lihat detail job (halaman apply)
+router.get('/:id', getJobById);
+
+//  PROTECTED: hanya HR yang bisa create, list all, update, delete
 router.post('/', verifyToken, createJob);
-router.get('/hr/my-jobs', verifyToken, getMyJobs);
+router.get('/', verifyToken, getAllJobs);
 router.put('/:id', verifyToken, updateJob);
 router.delete('/:id', verifyToken, deleteJob);
-
-// === PUBLIC ROUTES ===
-router.get('/', getAllJobs);
-router.get('/:id', getJobById);
 
 module.exports = router;
