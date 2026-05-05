@@ -17,7 +17,7 @@ async function verifyToken(req, res, next) {
         const decoded = jwt.verify(token, JWT_SECRET);
         
         // Ambil user dari database
-        const [users] = await db.execute('SELECT user_id, full_name, company_name, email, role FROM users WHERE user_id = ?', [decoded.user_id]);
+        const [users] = await db.execute('SELECT user_id, full_name, company_name, email, role, created_at FROM users WHERE user_id = ?', [decoded.user_id]);
         
         if (users.length === 0) {
             return res.status(401).json({ success: false, message: 'User tidak ditemukan' });

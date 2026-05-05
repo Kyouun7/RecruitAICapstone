@@ -3,6 +3,7 @@ const { verifyToken } = require('../middleware/auth');
 const {
     createJob,
     getAllJobs,
+    getMyJobs,
     getJobById,
     updateJob,
     deleteJob
@@ -10,12 +11,15 @@ const {
 
 const router = express.Router();
 
-//  PUBLIC: siapa pun bisa lihat detail job (halaman apply)
+// PROTECTED: spesifik routes dulu SEBELUM /:id
+router.get('/hr/my-jobs', verifyToken, getMyJobs);
+
+// PUBLIC: siapa pun bisa lihat semua job & detail job
+router.get('/', getAllJobs);
 router.get('/:id', getJobById);
 
-//  PROTECTED: hanya HR yang bisa create, list all, update, delete
+// PROTECTED: hanya HR yang bisa create, update, delete
 router.post('/', verifyToken, createJob);
-router.get('/', verifyToken, getAllJobs);
 router.put('/:id', verifyToken, updateJob);
 router.delete('/:id', verifyToken, deleteJob);
 

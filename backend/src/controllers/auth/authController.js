@@ -131,7 +131,8 @@ async function getMe(req, res) {
                 full_name: user.full_name,
                 company_name: user.company_name,
                 email: user.email,
-                role: user.role
+                role: user.role,
+                created_at: user.created_at
             }
         });
     } catch (error) {

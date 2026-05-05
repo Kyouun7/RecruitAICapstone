@@ -23,7 +23,7 @@ async function createJob(req, res) {
     }
 }
 
-// GET ALL JOBS (with total candidates)
+// GET ALL JOBS (public)
 async function getAllJobs(req, res) {
     try {
         const [jobs] = await db.query(`
@@ -36,6 +36,25 @@ async function getAllJobs(req, res) {
         res.status(200).json({ success: true, data: jobs });
     } catch (error) {
         console.error('Get jobs error:', error);
+        res.status(500).json({ success: false, message: 'Server error', error: error.message });
+    }
+}
+
+// GET MY JOBS (HR yang login)
+async function getMyJobs(req, res) {
+    try {
+        const userId = req.user.user_id;
+        const [jobs] = await db.query(`
+            SELECT j.*, COUNT(c.id) as total_candidates
+            FROM jobs j
+            LEFT JOIN candidates c ON j.job_id = c.job_id
+            WHERE j.created_by = ?
+            GROUP BY j.job_id
+            ORDER BY j.id DESC
+        `, [userId]);
+        res.status(200).json({ success: true, data: jobs });
+    } catch (error) {
+        console.error('Get my jobs error:', error);
         res.status(500).json({ success: false, message: 'Server error', error: error.message });
     }
 }
@@ -87,4 +106,4 @@ async function deleteJob(req, res) {
     }
 }
 
-module.exports = { createJob, getAllJobs, getJobById, updateJob, deleteJob };
+module.exports = { createJob, getAllJobs, getMyJobs, getJobById, updateJob, deleteJob };
