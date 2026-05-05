@@ -30,7 +30,7 @@ export default function DashboardPage() {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [stats, setStats] = useState<Stats>({ totalCandidates: 0, totalJobs: 0 });
-  const [activeTab, setActiveTab] = useState<'Week' | 'Month' | 'Year'>('Month');
+  const [activeTab, setActiveTab] = useState<'Minggu' | 'Bulan' | 'Tahun'>('Bulan');
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteTargetJob, setDeleteTargetJob] = useState<Job | null>(null);
@@ -101,7 +101,7 @@ export default function DashboardPage() {
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    return date.toLocaleDateString('id-ID', { month: 'short', day: 'numeric', year: 'numeric' });
   };
 
   // Derived stats from real data
@@ -121,11 +121,11 @@ export default function DashboardPage() {
       {/* ===== HEADER ===== */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="text-3xl font-headline font-bold text-on-surface mb-1">Recruitment Dashboard</h2>
-          <p className="text-on-surface-variant text-sm">Real-time performance insights for your recruitment pipeline.</p>
+          <h2 className="text-3xl font-headline font-bold text-on-surface mb-1">Dasbor Rekrutmen</h2>
+          <p className="text-on-surface-variant text-sm">Pantau performa rekrutmen Anda secara real-time.</p>
         </div>
         <div className="flex items-center gap-1 bg-surface-container-low rounded-lg p-1 border border-outline-variant/20">
-          {(['Week', 'Month', 'Year'] as const).map(tab => (
+          {(['Minggu', 'Bulan', 'Tahun'] as const).map(tab => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -144,7 +144,7 @@ export default function DashboardPage() {
       {/* ===== METRIC CARDS — hanya 2 card ===== */}
       <div className="grid grid-cols-2 gap-4 mb-8">
 
-        {/* Total Openings — REAL DATA */}
+        {/* Total Lowongan — REAL DATA */}
         <div className="bg-white p-5 rounded-xl border border-gray-100 shadow-sm">
           <div className="flex items-start justify-between mb-3">
             <div className="p-2.5 bg-surface-container-low rounded-lg">
@@ -152,11 +152,11 @@ export default function DashboardPage() {
             </div>
             {jobsThisWeek > 0 && (
               <span className="text-xs font-medium text-[#16a34a] bg-[#f0fdf4] px-2 py-0.5 rounded-full">
-                +{jobsThisWeek} this week
+                +{jobsThisWeek} minggu ini
               </span>
             )}
           </div>
-          <p className="text-xs text-on-surface-variant uppercase tracking-wider font-semibold mb-1">Total Openings</p>
+          <p className="text-xs text-on-surface-variant uppercase tracking-wider font-semibold mb-1">Total Lowongan</p>
           <p className="text-4xl font-bold text-on-surface">{isLoading ? '-' : activeJobs}</p>
           <div className="mt-3 h-1 bg-primary rounded-full" style={{ width: activeJobs > 0 ? '75%' : '0%' }}></div>
         </div>
@@ -180,7 +180,7 @@ export default function DashboardPage() {
       <div>
         <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
           <div className="px-6 py-5 border-b border-outline-variant/15 flex items-center justify-between">
-            <h3 className="font-semibold text-on-surface text-lg">Active Job Openings</h3>
+            <h3 className="font-semibold text-on-surface text-lg">Lowongan Aktif</h3>
             <div className="flex items-center gap-3">
               <Link href="/dashboard/create">
                 <button className="bg-primary text-white text-sm px-4 py-1.5 rounded-lg font-medium hover:opacity-90 transition-opacity flex items-center gap-1">
@@ -194,11 +194,11 @@ export default function DashboardPage() {
             <table className="w-full text-sm text-left">
               <thead>
                 <tr className="bg-surface-container-low text-on-surface-variant text-xs uppercase tracking-wider border-b border-outline-variant/15">
-                  <th className="px-6 py-3 font-semibold">Job Title</th>
-                  <th className="px-6 py-3 font-semibold">Date Posted</th>
+                  <th className="px-6 py-3 font-semibold">Judul Posisi</th>
+                  <th className="px-6 py-3 font-semibold">Tanggal Posting</th>
                   <th className="px-6 py-3 font-semibold">Pendaftar</th>
                   <th className="px-6 py-3 font-semibold">Status</th>
-                  <th className="px-6 py-3 font-semibold text-right">Action</th>
+                  <th className="px-6 py-3 font-semibold text-right">Aksi</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-outline-variant/10">
@@ -211,7 +211,7 @@ export default function DashboardPage() {
                 ) : jobs.length === 0 ? (
                   <tr>
                     <td colSpan={5} className="px-6 py-10 text-center text-on-surface-variant">
-                      No active job openings found.
+                      Belum ada lowongan aktif.
                     </td>
                   </tr>
                 ) : (
@@ -238,11 +238,11 @@ export default function DashboardPage() {
                       <td className="px-6 py-4">
                         {job.is_active ? (
                           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#f0fdf4] text-[#16a34a]">
-                            ● Open
+                            ● Buka
                           </span>
                         ) : (
                           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-error-container text-on-error-container">
-                            Closed
+                            Tutup
                           </span>
                         )}
                       </td>
@@ -285,12 +285,12 @@ export default function DashboardPage() {
       <div className="mt-auto pt-10">
         <div className="pt-6 border-t border-gray-200 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-gray-500">
           <p className="font-semibold text-on-surface">RecruitAI</p>
-          <p>© 2026 RecruitAI. All rights reserved.</p>
+          <p>© 2026 RecruitAI. Hak cipta dilindungi.</p>
           <div className="flex gap-4">
-            <a href="#" className="hover:text-primary transition-colors">Privacy Policy</a>
-            <a href="#" className="hover:text-primary transition-colors">Terms of Service</a>
-            <a href="#" className="hover:text-primary transition-colors">Cookie Settings</a>
-            <a href="#" className="hover:text-primary transition-colors">Contact Us</a>
+            <a href="#" className="hover:text-primary transition-colors">Kebijakan Privasi</a>
+            <a href="#" className="hover:text-primary transition-colors">Syarat & Ketentuan</a>
+            <a href="#" className="hover:text-primary transition-colors">Pengaturan Cookie</a>
+            <a href="#" className="hover:text-primary transition-colors">Hubungi Kami</a>
           </div>
         </div>
       </div>

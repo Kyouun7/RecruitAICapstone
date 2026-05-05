@@ -96,20 +96,20 @@ function StatusBadge({ status, score, threshold }: { status: string; score: numb
     return (
       <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200">
         <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-        Pending AI
+        Menunggu AI
       </span>
     );
   }
   if (score >= threshold) {
     return (
       <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-[#006c4d] text-white">
-        Lolos Threshold
+        Lolos Ambang Batas
       </span>
     );
   }
   return (
     <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-500">
-      Gagal Threshold
+      Gagal Ambang Batas
     </span>
   );
 }
@@ -132,7 +132,7 @@ function CVDrawer({
   }
 
   const scoreColor = score === null ? '#737780' : score >= 80 ? '#006c4d' : score >= 60 ? '#d97706' : '#ba1a1a';
-  const matchLabel = score === null ? 'Pending' : score >= 85 ? 'High Match' : score >= 70 ? 'Good Match' : score >= threshold ? 'Passed' : 'Low Match';
+  const matchLabel = score === null ? 'Pending' : score >= 85 ? 'Kecocokan Tinggi' : score >= 70 ? 'Kecocokan Baik' : score >= threshold ? 'Lolos' : 'Kecocokan Rendah';
   const matchColor = score === null ? 'bg-amber-100 text-amber-700' : score >= 85 ? 'bg-[#003366] text-white' : score >= threshold ? 'bg-[#006c4d] text-white' : 'bg-error-container text-on-error-container';
 
   return (
@@ -144,7 +144,7 @@ function CVDrawer({
           <div className="flex items-center justify-between px-5 py-3 bg-surface-container-lowest border-b border-outline-variant/20">
             <div className="flex items-center gap-2 text-on-surface-variant text-sm">
               <span className="material-symbols-outlined text-[18px]">description</span>
-              <span className="truncate max-w-[220px] font-medium">{candidate.cv_original_name || 'CV Document'}</span>
+              <span className="truncate max-w-[220px] font-medium">{candidate.cv_original_name || 'Dokumen CV'}</span>
             </div>
             <div className="flex items-center gap-1">
               {cvUrl && (
@@ -176,7 +176,7 @@ function CVDrawer({
             <p className="text-sm text-on-surface-variant">{candidate.posisi}</p>
           </div>
           <div className="px-5 py-4 border-b border-outline-variant/15">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mb-2">AI Match Score</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mb-2">Skor Kecocokan AI</p>
             <div className="flex items-center justify-between mb-2">
               <span className="text-4xl font-black" style={{ color: scoreColor }}>{score !== null ? `${score}%` : '—'}</span>
               <span className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-lg ${matchColor}`}>{matchLabel}</span>
@@ -186,7 +186,7 @@ function CVDrawer({
             </div>
           </div>
           <div className="px-5 py-4 border-b border-outline-variant/15">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mb-2">AI Analysis</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mb-2">Analisis AI</p>
             {candidate.justifikasi ? (
               <p className="text-xs text-on-surface-variant leading-relaxed">{candidate.justifikasi}</p>
             ) : (
@@ -199,13 +199,13 @@ function CVDrawer({
             )}
           </div>
           <div className="px-5 py-4 flex-1">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mb-3">Registration Details</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mb-3">Detail Pendaftaran</p>
             <div className="space-y-3.5">
               {[
-                { label: 'Full Name', value: candidate.nama },
+                { label: 'Nama Lengkap', value: candidate.nama },
                 { label: 'Email', value: candidate.email },
                 { label: 'Phone', value: candidate.telepon },
-                { label: 'Apply Date', value: formatDate(candidate.created_at) },
+                { label: 'Tanggal Melamar', value: formatDate(candidate.created_at) },
               ].map(({ label, value }) => (
                 <div key={label}>
                   <p className="text-[10px] text-outline uppercase tracking-wider mb-0.5">{label}</p>
@@ -214,7 +214,7 @@ function CVDrawer({
               ))}
               {candidate.portofolio && (
                 <div>
-                  <p className="text-[10px] text-outline uppercase tracking-wider mb-0.5">Portfolio</p>
+                  <p className="text-[10px] text-outline uppercase tracking-wider mb-0.5">Portofolio</p>
                   <a href={candidate.portofolio} target="_blank" rel="noopener noreferrer" className="text-sm font-semibold text-primary hover:underline break-all">{candidate.portofolio}</a>
                 </div>
               )}
@@ -227,7 +227,7 @@ function CVDrawer({
           <div className="px-5 py-4 border-t border-outline-variant/15">
             <button onClick={() => onSendEmail(candidate)} className="w-full flex items-center justify-center gap-2 bg-gradient-to-br from-[#001e40] to-[#003366] text-white py-3 rounded-xl font-semibold text-sm shadow-sm hover:opacity-90 active:scale-[0.98] transition-all">
               <span className="material-symbols-outlined text-[18px]">mail</span>
-              Send Email
+              Kirim Email
             </button>
           </div>
         </div>
@@ -303,7 +303,7 @@ export default function JobDetailPage() {
 
   const handleSendEmail = (candidate: Candidate) => {
     const subject = encodeURIComponent(`Hasil Seleksi - ${candidate.posisi}`);
-    const body = encodeURIComponent(`Yth. ${candidate.nama},\n\nTerima kasih telah melamar posisi ${candidate.posisi}.\n\nHasil AI Score Anda: ${candidate.score ?? 'Pending'}/100\nStatus: ${candidate.score !== null && candidate.score >= threshold ? 'Lolos' : 'Belum Lolos'} Threshold\n\nHormat kami,\nRecruitAI Team`);
+    const body = encodeURIComponent(`Yth. ${candidate.nama},\n\nTerima kasih telah melamar posisi ${candidate.posisi}.\n\nSkor AI Anda: ${candidate.score ?? 'Pending'}/100\nStatus: ${candidate.score !== null && candidate.score >= threshold ? 'Lolos' : 'Belum Lolos'} Ambang Batas\n\nHormat kami,\nTim RecruitAI`);
     window.open(`mailto:${candidate.email}?subject=${subject}&body=${body}`);
     setEmailSent(candidate.candidate_id);
     setTimeout(() => setEmailSent(null), 3000);
@@ -364,13 +364,13 @@ export default function JobDetailPage() {
           </div>
         </div>
 
-        {/* ===== STATS ROW: Total Pendaftar + Kandidat Lolos Threshold ===== */}
+        {/* ===== STATS ROW: Total Pendaftar + Kandidat Lolos Ambang Batas ===== */}
         <div className="grid grid-cols-2 gap-5 mb-6">
 
           {/* Total Pendaftar */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
             <p className="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-1">Total Pendaftar</p>
-            <p className="text-xs text-on-surface-variant mb-4">Total applicants for this job</p>
+            <p className="text-xs text-on-surface-variant mb-4">Total pelamar untuk lowongan ini</p>
             {isLoading ? (
               <div className="h-12 bg-surface-container-high rounded animate-pulse w-24" />
             ) : (
@@ -388,9 +388,9 @@ export default function JobDetailPage() {
             )}
           </div>
 
-          {/* Kandidat Lolos Threshold */}
+          {/* Kandidat Lolos Ambang Batas */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-            <p className="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-4">Kandidat Lolos Threshold</p>
+            <p className="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-4">Kandidat Lolos Ambang Batas</p>
             {isLoading ? (
               <div className="flex items-center gap-5">
                 <div className="w-[100px] h-[100px] rounded-full bg-surface-container-high animate-pulse" />
@@ -432,7 +432,7 @@ export default function JobDetailPage() {
         {/* ===== TOP CANDIDATES LEADERBOARD ===== */}
         {!isLoading && topCandidates.length > 0 && (
           <div className="mb-6">
-            <h3 className="text-base font-bold text-on-surface mb-4 font-headline">Top Candidates Leaderboard</h3>
+            <h3 className="text-base font-bold text-on-surface mb-4 font-headline">Papan Peringkat Kandidat Terbaik</h3>
             <div className="grid grid-cols-3 gap-4">
               {topCandidates.map((c, idx) => {
                 const scoreColor = c.score! >= 80 ? '#006c4d' : c.score! >= 60 ? '#d97706' : '#ba1a1a';
@@ -464,7 +464,7 @@ export default function JobDetailPage() {
                     </div>
                     <div className="flex items-end gap-1 mb-2">
                       <span className="text-3xl font-black" style={{ color: scoreColor }}>{c.score}</span>
-                      <span className="text-xs text-on-surface-variant mb-1">/100 AI Score</span>
+                      <span className="text-xs text-on-surface-variant mb-1">/100 Skor AI</span>
                     </div>
                     <div className="h-1.5 bg-surface-container-high rounded-full overflow-hidden">
                       <div className="h-full rounded-full transition-all" style={{ width: `${c.score}%`, backgroundColor: scoreColor }} />
@@ -481,7 +481,7 @@ export default function JobDetailPage() {
 
           {/* Table Header */}
           <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-            <h3 className="text-base font-bold text-on-surface font-headline">Applicant Pipeline</h3>
+            <h3 className="text-base font-bold text-on-surface font-headline">Pipeline Pelamar</h3>
             <div className="flex items-center gap-2">
               {/* Filter */}
               <div className="relative">
@@ -491,9 +491,9 @@ export default function JobDetailPage() {
                   className="appearance-none pl-8 pr-4 py-2 text-xs font-medium bg-gray-50 border border-gray-200 rounded-lg text-on-surface-variant focus:outline-none cursor-pointer hover:border-primary/30 transition-colors"
                 >
                   <option value="all">Semua Status</option>
-                  <option value="lolos">Lolos Threshold</option>
-                  <option value="gagal">Gagal Threshold</option>
-                  <option value="pending">Pending AI</option>
+                  <option value="lolos">Lolos Ambang Batas</option>
+                  <option value="gagal">Gagal Ambang Batas</option>
+                  <option value="pending">Menunggu AI</option>
                 </select>
                 <span className="material-symbols-outlined text-[14px] text-on-surface-variant absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none">filter_list</span>
               </div>
@@ -517,10 +517,10 @@ export default function JobDetailPage() {
               <thead>
                 <tr className="bg-gray-50 text-gray-500 text-xs uppercase tracking-wider border-b border-gray-100">
                   <th className="px-6 py-3 font-semibold">Nama Kandidat</th>
-                  <th className="px-6 py-3 font-semibold">Score AI</th>
+                  <th className="px-6 py-3 font-semibold">Skor AI</th>
                   <th className="px-6 py-3 font-semibold">Status</th>
-                  <th className="px-6 py-3 font-semibold">Tanggal Apply</th>
-                  <th className="px-6 py-3 font-semibold text-right">Action</th>
+                  <th className="px-6 py-3 font-semibold">Tanggal Melamar</th>
+                  <th className="px-6 py-3 font-semibold text-right">Aksi</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
@@ -540,7 +540,7 @@ export default function JobDetailPage() {
                       <span className="material-symbols-outlined text-5xl text-outline-variant block mb-3" style={{ fontVariationSettings: "'FILL' 0" }}>group_off</span>
                       <p className="text-on-surface-variant font-medium">Belum ada kandidat</p>
                       <p className="text-xs text-outline mt-1">
-                        {filterStatus !== 'all' ? 'Tidak ada kandidat dengan filter ini' : 'Bagikan link lowongan untuk mulai menerima lamaran'}
+                        {filterStatus !== 'all' ? 'Tidak ada kandidat dengan filter ini' : 'Bagikan tautan lowongan untuk mulai menerima lamaran'}
                       </p>
                     </td>
                   </tr>
@@ -582,7 +582,7 @@ export default function JobDetailPage() {
                         </td>
                         {/* Tanggal */}
                         <td className="px-6 py-4 text-on-surface-variant">{formatDate(candidate.created_at)}</td>
-                        {/* Action */}
+                        {/* Aksi */}
                         <td className="px-6 py-4 text-right" onClick={(e) => e.stopPropagation()}>
                           <div className="flex justify-end gap-1">
                             <button
@@ -607,7 +607,7 @@ export default function JobDetailPage() {
           {filteredCandidates.length > 0 && (
             <div className="px-6 py-3 border-t border-outline-variant/10 flex items-center justify-between bg-gray-50 text-xs text-gray-500">
               <span>Menampilkan <strong className="text-on-surface">{filteredCandidates.length}</strong> dari <strong className="text-on-surface">{candidates.length}</strong> kandidat</span>
-              <span>AI Threshold: <strong className="text-primary">{threshold}</strong> / 100</span>
+              <span>Ambang Batas AI: <strong className="text-primary">{threshold}</strong> / 100</span>
             </div>
           )}
         </div>

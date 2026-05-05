@@ -10,8 +10,8 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { icon: 'dashboard', label: 'Dashboard', href: '/dashboard' },
-  { icon: 'settings', label: 'Settings', href: '/dashboard/settings' },
+  { icon: 'dashboard', label: 'Dasbor', href: '/dashboard' },
+  { icon: 'settings', label: 'Pengaturan', href: '/dashboard/settings' },
 ];
 
 export default function AdminSidebar() {
@@ -64,7 +64,7 @@ export default function AdminSidebar() {
           href="/dashboard/create"
           className="w-full block text-center bg-gradient-to-br from-primary to-[#003366cc] text-white py-3 rounded-lg font-headline font-semibold active:scale-95 duration-150 shadow-sm hover:shadow-md transition-all"
         >
-          + Post a Job
+          + Buat Lowongan
         </Link>
       </div>
     </aside>
