@@ -8,7 +8,7 @@
         "responseMode": "responseNode",
         "options": {}
       },
-      "id": "2ed975b6-6ef0-43aa-8166-c29fbcb50821",
+      "id": "72ec2ae4-aad4-4f86-aa7e-e7f782045a02",
       "name": "Webhook - Receive Candidate",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
@@ -22,7 +22,7 @@
       "parameters": {
         "jsCode": "const raw = $input.first().json;\nconst data = raw.body || raw;\n\nconst required = ['candidate_id', 'job_id', 'cv_path'];\nfor (const field of required) {\n  if (!data[field]) throw new Error('Missing required field: ' + field);\n}\n\nconst cvUrl = data.cv_path;\nlet fileId = '';\n\n// format: /file/d/ID/view\nconst match = cvUrl.match(/\\/d\\/([a-zA-Z0-9_-]+)/);\nif (match) {\n  fileId = match[1];\n}\n// format: ?id=ID\nelse if (cvUrl.includes('id=')) {\n  const parts = cvUrl.split('id=');\n  fileId = parts[1]?.split('&')[0] || '';\n}\n\nif (!fileId) {\n  throw new Error('Cannot extract Google Drive file ID from: ' + cvUrl);\n}\n\nreturn [{\n  json: {\n    candidate_id: data.candidate_id,\n    candidate_name: data.candidate_name || '',\n    email: data.email || '',\n    job_id: data.job_id,\n    job_title: data.job_title || data.division || '',\n    job_description: data.job_description || '',\n    key_responsibilities: data.key_responsibilities || '',\n    minimum_qualifications: data.minimum_qualifications || '',\n    threshold_score: parseInt(data.threshold_score) || 70,\n    cv_path: cvUrl,\n    division: data.division || '',\n    gdrive_file_id: fileId,\n    download_url: 'https://drive.google.com/uc?export=download&id=' + fileId\n  }\n}];"
       },
-      "id": "7a79bfbf-8161-470a-ba56-18675261d981",
+      "id": "4d3d9696-ba0f-4a02-91ca-86d10984b8c6",
       "name": "Code - Validate & Extract",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -47,7 +47,7 @@
           }
         }
       },
-      "id": "006c713f-86a0-488f-9c44-496672dd0d61",
+      "id": "6019b7ad-1cbd-4d61-add2-d9a17a6d4484",
       "name": "HTTP - Download CV PDF",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4,
@@ -61,7 +61,7 @@
         "operation": "pdf",
         "options": {}
       },
-      "id": "01df4efb-9c6a-495d-82a6-19742f1cd174",
+      "id": "95d51793-a4c3-4034-b2ef-80a506354410",
       "name": "Extract from File - PDF Text",
       "type": "n8n-nodes-base.extractFromFile",
       "typeVersion": 1,
@@ -74,7 +74,7 @@
       "parameters": {
         "jsCode": "const cvText = ($input.first().json.text || '').trim();\nif (!cvText) throw new Error('CV text extraction failed or CV is empty');\nconst jobData = $('Code - Validate & Extract').first().json;\nconst prompt = `You are an AI recruitment assistant evaluating a candidate CV for the position of \"${jobData.job_title || jobData.division}\" at a technology company.\\n\\n## JOB INFORMATION\\nPosition: ${jobData.job_title || jobData.division}\\nDescription: ${jobData.job_description || 'Not provided'}\\nKey Responsibilities: ${jobData.key_responsibilities || 'Not specified'}\\nMinimum Qualifications: ${jobData.minimum_qualifications || 'Not specified'}\\nMinimum passing score: ${jobData.threshold_score}/100\\n\\n## CANDIDATE CV\\n${cvText.substring(0, 6000)}\\n\\n## EVALUATION INSTRUCTIONS\\nEvaluate how well this candidate matches the job requirements.\\nRespond ONLY with valid JSON, no markdown, no explanation outside the JSON:\\n{\\n  \"score\": <integer 0-100>,\\n  \"reasoning\": \"<2-3 sentence summary>\",\\n  \"strengths\": [\"<strength 1>\", \"<strength 2>\"],\\n  \"gaps\": [\"<gap 1>\"]\\n}`;\nconst llmBody = JSON.stringify({\n  model: 'llama3.2',\n  messages: [{ role: 'user', content: prompt }],\n  stream: false,\n  format: 'json',\n  options: { temperature: 0.3 }\n});\nreturn [{ json: { ...jobData, cv_text_preview: cvText.substring(0, 200), llm_request_body: llmBody }}];"
       },
-      "id": "f59ed5ee-b1d6-4724-87fa-1130f16a32a3",
+      "id": "df98b28b-b09f-4d29-a54f-d01590567edb",
       "name": "Code - Build LLM Prompt",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -104,7 +104,7 @@
           "timeout": 120000
         }
       },
-      "id": "dfb6534a-ae48-4b94-96fc-f9d95c0fa3a3",
+      "id": "a3283e44-bdbc-490a-a5b7-ca02f2c17e28",
       "name": "HTTP - LLM Scoring (Ollama)",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4,
@@ -117,7 +117,7 @@
       "parameters": {
         "jsCode": "const llmResponse = $input.first().json;\nconst baseData = $('Code - Build LLM Prompt').first().json;\nconst content = llmResponse.message?.content || llmResponse.response || '';\nlet evalResult;\ntry {\n  const cleaned = content.replace(/```json\\n?/g, '').replace(/```\\n?/g, '').trim();\n  const jsonMatch = cleaned.match(/\\{[\\s\\S]*\\}/);\n  evalResult = JSON.parse(jsonMatch ? jsonMatch[0] : cleaned);\n} catch (e) {\n  evalResult = { score: 50, reasoning: 'Automated review completed. Manual review recommended.', strengths: [], gaps: [] };\n}\nconst score = Math.min(100, Math.max(0, parseInt(evalResult.score) || 0));\nconst threshold = parseInt(baseData.threshold_score) || 70;\nconst status = score >= threshold ? 'accepted' : 'rejected';\n\nreturn [{\n  json: {\n    ...baseData,\n    score,\n    status,\n    ai_reasoning: evalResult.reasoning || ''\n  }\n}];"
       },
-      "id": "6cf29b91-11c2-48f9-bcdf-3e75eed7ae1c",
+      "id": "05978b92-be08-4a8d-bde6-503c8dae7e62",
       "name": "Code - Parse Score & Status",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -140,7 +140,6 @@
           ]
         },
         "sendBody": true,
-        "contentType": "json",
         "bodyParameters": {
           "parameters": [
             {
@@ -156,7 +155,7 @@
               "value": "={{ $json.status }}"
             },
             {
-              "name": "ai_reasoning",
+              "name": "justifikasi",
               "value": "={{ $json.ai_reasoning }}"
             }
           ]
@@ -165,7 +164,7 @@
           "timeout": 10000
         }
       },
-      "id": "b28f6517-5155-4226-9167-7de6813aa363",
+      "id": "4744d9fd-d507-4044-91c8-0b449c7f13f8",
       "name": "HTTP - Update Candidate in Backend",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4,
@@ -180,7 +179,7 @@
         "combineBy": "combineByPosition",
         "options": {}
       },
-      "id": "df975b22-cd77-4bf8-b230-a908467f1454",
+      "id": "ef31c39f-f7dd-426f-a4e9-02d056b12559",
       "name": "Merge - Preserve Candidate Context",
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3,
@@ -200,7 +199,7 @@
           ]
         }
       },
-      "id": "9fb40635-2515-48b8-a490-7e5bbbfd416e",
+      "id": "d5ad4d07-7ec6-415a-9411-3231d0ee98df",
       "name": "IF - Check Accepted",
       "type": "n8n-nodes-base.if",
       "typeVersion": 1,
@@ -216,7 +215,7 @@
         "message": "=Hello {{$json.candidate_name}},\n\nCongratulations! You have passed the initial screening for {{$json.job_title}}.\n\nOur team will contact you for the next stage.\n\n- RecruitAI",
         "options": {}
       },
-      "id": "e24fc5b4-5432-4217-b6c5-979be293012a",
+      "id": "dfa410ee-9675-4d44-90f1-c85d347c3175",
       "name": "Gmail - Accepted",
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2,
@@ -239,7 +238,7 @@
         "message": "=Hello {{$json.candidate_name}},\n\nThank you for applying for {{$json.job_title}}.\n\nWe regret to inform you that you were not selected.\n\nWe wish you success in your future applications.\n\n- RecruitAI",
         "options": {}
       },
-      "id": "d62b9aca-8674-4838-93dd-c14ee1f42797",
+      "id": "2631fa43-e162-472a-b31c-6f1e03357267",
       "name": "Gmail - Rejected",
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2,
@@ -269,7 +268,7 @@
           }
         }
       },
-      "id": "169878a8-0f63-4fc2-8d93-c3044deb2525",
+      "id": "d599adc6-1d66-4ca0-9e13-99ddc593441c",
       "name": "Respond to Webhook",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1,
@@ -465,11 +464,10 @@
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "versionId": "d2da91f6-f3a7-4f30-8690-aab34580ceca",
+  "versionId": "8557fe4f-a490-433f-8bb2-030e06a4f320",
   "meta": {
-    "templateCredsSetupCompleted": true,
     "instanceId": "8560ccc64edfcdda273aeb154db2d9895569b0feb232aaf23fdb968b63e7fc95"
   },
-  "id": "lvXbvphdKfq2hx9q",
+  "id": "5wPNTVBbKTAOiymX",
   "tags": []
 }
