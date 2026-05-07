@@ -10,5 +10,8 @@ services:
       - N8N_PROTOCOL=http
       - NODE_ENV=production
       - WEBHOOK_URL=http://localhost:5678/
+      - GROQ_API_KEY=${GROQ_API_KEY}
+      - N8N_BLOCK_ENV_ACCESS_IN_NODE=false
+      - N8N_BLOCK_FILE_ACCESS_TO_N8N_FILES=false
     volumes:
       - ./n8n_data:/home/node/.n8n
