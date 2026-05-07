@@ -2,7 +2,7 @@
 
 Capstone project for Universitas Brawijaya — PT. Jalin Mayantara Indonesia.
 
-An AI-powered recruitment platform that automatically screens and scores candidate CVs using a local LLM (Ollama), eliminating manual CV review for HR teams.
+An AI-powered recruitment platform that automatically screens and scores candidate CVs using Groq-hosted GPT-OSS-120B, eliminating manual CV review for HR teams.
 
 ---
 
@@ -23,7 +23,7 @@ Candidate submits CV
     → Backend sends webhook to n8n
     → n8n downloads CV from Google Drive
     → Extracts text from PDF
-    → Sends to Ollama (llama3.2) for scoring
+    → Sends to Groq API (GPT-OSS-120B) for AI evaluation
     → Parses score (0-100) and status (accepted/rejected)
     → Updates candidate record in database
 ```
@@ -38,7 +38,7 @@ Candidate submits CV
 | Backend | Node.js, Express.js |
 | Database | MySQL |
 | Automation | n8n (Docker) |
-| AI / LLM | Ollama (llama3.2 — runs locally, no API key needed) |
+| AI / LLM | Groq API (GPT-OSS-120B) |
 | Storage | Google Drive (fallback: local `uploads/` folder) |
 
 ---
@@ -63,8 +63,8 @@ Install all of these before starting:
 
 - [Node.js](https://nodejs.org) v18+
 - [Docker Desktop](https://www.docker.com/products/docker-desktop) — for n8n
-- [Ollama](https://ollama.com/download) — for local AI scoring
 - MySQL — via XAMPP, MySQL Workbench, or standalone installer
+- Groq API Key
 - Git
 
 ---
@@ -201,23 +201,41 @@ The `.env.local` is already configured and does not need changes.
 
 ---
 
-### Step 5 — Setup Ollama (Local AI)
+### Step 5 — Setup Groq API (Cloud AI)
 
-1. Install from https://ollama.com/download and run the installer
-2. Pull the model (~2GB download):
+RecruitAI uses Groq Cloud inference with the `GPT-OSS-120B` large language model for automated CV evaluation and candidate scoring.
 
-```bash
-ollama pull llama3.2
+1. Create a Groq account at:
+
+```text
+https://console.groq.com
 ```
 
-3. Verify Ollama is running:
+2. Generate an API key from the Groq dashboard
 
-```bash
-curl http://localhost:11434/api/tags
-# Expected: list of installed models
+3. Add the API key to your `.env` file:
+
+```env
+GROQ_API_KEY=your_groq_api_key_here
 ```
 
-Ollama runs as a background service after installation. No API key needed — it's fully local.
+4. If using Docker Compose for n8n, ensure the environment variable is passed into the container:
+
+```yaml
+services:
+  n8n:
+    env_file:
+      - .env
+```
+
+5. Restart the n8n container:
+
+```bash
+docker compose down
+docker compose up -d
+```
+
+The AI scoring workflow now uses Groq's hosted inference API.
 
 ---
 
