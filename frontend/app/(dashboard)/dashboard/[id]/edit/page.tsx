@@ -102,24 +102,39 @@ export default function EditJobPage() {
       return;
     }
     setIsSubmitting(true);
-    try {
-      const payload = {
-        title: formData.jobTitle,
-        employment_type: formData.employmentType,
-        work_setup: formData.workSetup,
-        location: formData.location,
-        description: formData.aboutRole,
-        key_responsibilities: formData.responsibilities,
-        minimum_qualifications: formData.qualifications,
-        threshold_score: formData.aiMatchScore,
-      };
+    const payload = {
+    title: formData.jobTitle,
+    employment_type: formData.employmentType,
+    work_setup: formData.workSetup,
+    location: formData.location,
+    description: formData.aboutRole,
+    key_responsibilities: formData.responsibilities,
+    minimum_qualifications: formData.qualifications,
+    threshold_score: formData.aiMatchScore,
+  };
 
-      await api.put(`/api/jobs/${jobId}`, payload);
-      router.push(`/dashboard/${jobId}`);
-    } catch (error) {
-      console.error('Failed to update job:', error);
-      alert('Gagal menyimpan perubahan. Coba lagi.');
-    } finally {
+  try {
+    console.log('PAYLOAD:', payload);
+
+    const response = await api.put(`/api/jobs/${jobId}`, payload);
+
+    console.log('SUCCESS:', response.data);
+
+    router.push(`/dashboard/${jobId}`);
+
+  } catch (error: any) {
+    console.error('FULL ERROR:', error);
+
+    if (error.response) {
+      console.log('STATUS:', error.response.status);
+      console.log('RESPONSE DATA:', error.response.data);
+      console.log('HEADERS:', error.response.headers);
+    }
+
+    console.log('PAYLOAD:', payload);
+
+    alert('Gagal menyimpan perubahan. Cek console.');
+  } finally {
       setIsSubmitting(false);
     }
   };

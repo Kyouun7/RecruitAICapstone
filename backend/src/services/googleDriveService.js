@@ -8,26 +8,25 @@ let drive;
 let isOAuthConfigured = false;
 
 async function getOAuthClient() {
-    const tokenPath = path.join(process.cwd(), 'token.json');
-    const credentialsPath = path.join(process.cwd(), 'client_secret.json');
+    // Read OAuth credentials from environment variables
+    const clientId = process.env.GOOGLE_CLIENT_ID;
+    const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
+    const refreshToken = process.env.GOOGLE_REFRESH_TOKEN;
+    const redirectUri = process.env.GOOGLE_REDIRECT_URI || 'http://localhost:3000/oauth2callback';
     
-    if (!fs.existsSync(tokenPath)) {
-        console.log(' token.json not found. Run node auth.js first!');
+    if (!clientId || !clientSecret || !refreshToken) {
+        console.log(' Missing required Google OAuth env vars: GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REFRESH_TOKEN');
         return null;
     }
     
-    const token = JSON.parse(fs.readFileSync(tokenPath));
-    const credentials = JSON.parse(fs.readFileSync(credentialsPath));
-    const key = credentials.installed || credentials.web;
-    
     const oAuth2Client = new google.auth.OAuth2(
-        key.client_id,
-        key.client_secret,
-        key.redirect_uris ? key.redirect_uris[0] : 'http://localhost:3000/oauth2callback'
+        clientId,
+        clientSecret,
+        redirectUri
     );
     
     oAuth2Client.setCredentials({
-        refresh_token: token.refresh_token
+        refresh_token: refreshToken
     });
     
     return oAuth2Client;
