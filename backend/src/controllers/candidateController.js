@@ -7,9 +7,9 @@ const { isValidEmail, isValidPhone } = require('../utils/helpers');
 const db = require('../db/connection');
 
 async function createCandidate(req, res) {
-    console.log(' Controller DIPANGGIL!');
-    console.log(' File:', req.file);
-    console.log('Body:', req.body);
+    console.log('🔍 Controller called for candidate application');
+    console.log('📄 File:', req.file?.filename);
+    console.log('📋 Body:', req.body);
     try {
         const { nama, email, telepon, portofolio, posisi, job_id } = req.body;
         const file = req.file;
@@ -23,15 +23,44 @@ async function createCandidate(req, res) {
         if (!job_id) errors.push('Job ID wajib diisi');
         if (!file) errors.push('File CV wajib diupload');
         if (errors.length > 0) return res.status(400).json({ success: false, errors });
-        console.log('Uploading CV to Google Drive for:', nama);
+        console.log('✅ Validation passed');
+        
+        console.log('📤 Uploading CV to Google Drive for:', nama);
         const uploadResult = await uploadCVToGoogleDrive(file, nama);
-        const candidate = await saveCandidate({ nama, email, telepon, portofolio: portofolio || null, posisi, job_id, cv_google_drive_id: uploadResult.fileId, cv_original_name: file.originalname, cv_url: uploadResult.url });
-        console.log(' PAYLOAD ke n8n:', { candidate_id: candidate.candidate_id, job_id: candidate.job_id, cv_path: uploadResult.url, division: candidate.posisi, nama: candidate.nama, email: candidate.email });
-        sendToWebhook({ candidate_id: candidate.candidate_id, candidate_name: candidate.nama, email: candidate.email, job_id: candidate.job_id, cv_path: uploadResult.url, division: candidate.posisi });
-        res.status(201).json({ success: true, message: 'Lamaran berhasil dikirim', data: candidate });
+        console.log('✅ CV uploaded:', uploadResult.fileId);
+        
+        const candidate = await saveCandidate({ 
+            nama, email, telepon, portofolio: portofolio || null, posisi, job_id, 
+            cv_google_drive_id: uploadResult.fileId, 
+            cv_original_name: file.originalname, 
+            cv_url: uploadResult.url 
+        });
+        console.log('✅ Candidate saved:', candidate.candidate_id);
+        
+        console.log('📡 Preparing webhook payload...');
+        // Send webhook with all necessary data
+        sendToWebhook({ 
+            candidate_id: candidate.candidate_id, 
+            candidate_name: candidate.nama, 
+            email: candidate.email, 
+            job_id: candidate.job_id,  // IMPORTANT: Ensure job_id is included
+            cv_path: uploadResult.url, 
+            division: candidate.posisi 
+        });
+        
+        console.log('✅ Application submitted:', candidate.candidate_id);
+        res.status(201).json({ 
+            success: true, 
+            message: 'Lamaran berhasil dikirim', 
+            data: candidate 
+        });
     } catch (error) {
-        console.error(' Error:', error);
-        res.status(500).json({ success: false, message: 'Server error', error: error.message });
+        console.error('❌ Error:', error);
+        res.status(500).json({ 
+            success: false, 
+            message: 'Server error', 
+            error: error.message 
+        });
     }
 }
 

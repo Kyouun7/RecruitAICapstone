@@ -23,7 +23,16 @@ CREATE TABLE IF NOT EXISTS jobs (
     job_id VARCHAR(50) NOT NULL UNIQUE,
     title VARCHAR(100) NOT NULL,
     description TEXT,
-    threshold_score INT DEFAULT 70
+    threshold_score INT DEFAULT 70,
+    employment_type VARCHAR(50) DEFAULT 'Full-time',
+    location VARCHAR(255),
+    work_setup ENUM('Remote', 'Hybrid', 'On-site', 'Office') DEFAULT 'Office',
+    key_responsibilities TEXT,
+    minimum_qualifications TEXT,
+    is_active BOOLEAN DEFAULT TRUE,
+    created_by VARCHAR(50),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
 -- Tabel users untuk HR (admin)
