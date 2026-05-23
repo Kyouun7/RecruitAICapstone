@@ -32,7 +32,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "RecruitAI — PT. Jalin Mayantara Indonesia",
+  title: "RecruitAI",
   description:
     "Sistem rekrutmen cerdas berbasis AI untuk PT. Jalin Mayantara Indonesia",
 };

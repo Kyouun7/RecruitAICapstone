@@ -53,7 +53,7 @@ export default function HeroSection() {
               </div>
               <div>
                 <div className="text-xs font-bold text-primary">Status Screening</div>
-                <div className="text-xs text-on-surface-variant">24 CV diproses otomatis</div>
+                <div className="text-xs text-on-surface-variant">Screening berjalan otomatis 24 jam</div>
               </div>
             </div>
 

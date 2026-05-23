@@ -94,7 +94,7 @@ export default function CoreFeatures() {
 
             {/* Floating badge */}
             <div className="absolute -bottom-5 -right-5 bg-primary text-white px-5 py-3 rounded-2xl shadow-xl text-sm font-bold">
-              4 kandidat diranking otomatis
+              kandidat diranking otomatis
             </div>
           </div>
 

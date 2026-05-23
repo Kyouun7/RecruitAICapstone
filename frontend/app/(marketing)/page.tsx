@@ -10,14 +10,14 @@ import FAQSection from "@/components/home/FAQSection";
 export default function Home() {
   return (
     <>
-      <HeroSection />
+      <div id="hero"><HeroSection /></div>
       <LogoCloud />
       <KeyStats />
-      <AboutSection />
-      <HowItWorks />
+      <div id="about"><AboutSection /></div>
+      <div id="features"><HowItWorks /></div>
       <CoreFeatures />
-      <PricingSection />
-      <FAQSection />
+      <div id="pricing"><PricingSection /></div>
+      <div id="faq"><FAQSection /></div>
     </>
   );
 }
