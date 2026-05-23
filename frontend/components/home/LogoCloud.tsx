@@ -13,16 +13,13 @@ export default function LogoCloud() {
           Dipercaya oleh tim HR inovatif di berbagai perusahaan
         </p>
       </div>
-      <div className="flex justify-center items-center gap-16 flex-wrap px-8">
+      <div className="flex justify-center items-center gap-20 flex-wrap px-8">
         {logos.map((logo, i) => (
-          <div
-            key={i}
-            className="flex items-center justify-center opacity-40 grayscale hover:opacity-90 hover:grayscale-0 transition-all duration-300"
-          >
+          <div key={i} className="flex items-center justify-center opacity-70 hover:opacity-100 transition-opacity duration-300">
             <img
               src={logo.src}
               alt={logo.name}
-              className="h-14 w-auto object-contain"
+              className="h-16 w-auto object-contain"
             />
           </div>
         ))}
