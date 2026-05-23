@@ -1,17 +1,31 @@
 export default function LogoCloud() {
+  const logos = [
+    { name: 'Kemendikbud', src: '/logos/kemendikbud.png' },
+    { name: 'Universitas Brawijaya', src: '/logos/ub.png' },
+    { name: 'FILKOM UB', src: '/logos/filkom.png' },
+    { name: 'Jalin Bergerak', src: '/logos/jalin.png' },
+  ];
+
   return (
-    <section className="py-16 bg-white">
-      <div className="max-w-7xl mx-auto px-8 text-center">
-        <p className="text-sm font-semibold text-slate-400 uppercase tracking-[0.2em] mb-10">
-          Trusted by innovative HR teams at:
+    <section className="py-14 bg-white">
+      <div className="max-w-7xl mx-auto px-8 text-center mb-10">
+        <p className="text-sm font-semibold text-slate-400 uppercase tracking-[0.2em]">
+          Dipercaya oleh tim HR inovatif di berbagai perusahaan
         </p>
-        <div className="flex flex-wrap justify-center items-center gap-12 lg:gap-20 opacity-40 grayscale hover:grayscale-0 transition-all duration-500">
-          <div className="h-8 w-32 bg-[url('https://upload.wikimedia.org/wikipedia/commons/2/2f/Google_2015_logo.svg')] bg-no-repeat bg-contain bg-center"></div>
-          <div className="h-8 w-32 bg-[url('https://upload.wikimedia.org/wikipedia/commons/5/51/IBM_logo.svg')] bg-no-repeat bg-contain bg-center"></div>
-          <div className="h-8 w-32 bg-[url('https://upload.wikimedia.org/wikipedia/commons/4/44/Microsoft_logo.svg')] bg-no-repeat bg-contain bg-center"></div>
-          <div className="h-8 w-32 bg-[url('https://upload.wikimedia.org/wikipedia/commons/0/08/Netflix_2015_logo.svg')] bg-no-repeat bg-contain bg-center"></div>
-          <div className="h-8 w-32 bg-[url('https://upload.wikimedia.org/wikipedia/commons/a/a9/Amazon_logo.svg')] bg-no-repeat bg-contain bg-center"></div>
-        </div>
+      </div>
+      <div className="flex justify-center items-center gap-16 flex-wrap px-8">
+        {logos.map((logo, i) => (
+          <div
+            key={i}
+            className="flex items-center justify-center opacity-40 grayscale hover:opacity-90 hover:grayscale-0 transition-all duration-300"
+          >
+            <img
+              src={logo.src}
+              alt={logo.name}
+              className="h-14 w-auto object-contain"
+            />
+          </div>
+        ))}
       </div>
     </section>
   );
