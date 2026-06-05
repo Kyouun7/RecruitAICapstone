@@ -1,4 +1,5 @@
 stages:
+  - inspect
   - build
   - deploy
 
@@ -16,6 +17,23 @@ workflow:
   rules:
     - if: '$CI_COMMIT_BRANCH == $DEPLOY_BRANCH'
     - when: never
+
+show_vm_ip:
+  stage: inspect
+  when: manual
+  allow_failure: true
+  script:
+    - echo "Hostname:"
+    - hostname
+    - echo "Local IP addresses:"
+    - hostname -I || true
+    - echo "Default route:"
+    - ip route || true
+    - echo "Public IP from external services:"
+    - curl -fsS https://ifconfig.me || true
+    - echo
+    - curl -fsS https://api.ipify.org || true
+    - echo
 
 build_images:
   stage: build
