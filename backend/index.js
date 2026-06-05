@@ -13,9 +13,32 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+const defaultOrigins = [
+    'http://localhost:3001',
+    'http://localhost:3000',
+    'http://127.0.0.1:3001',
+    'https://recruitai-peach.vercel.app'
+];
+
+const configuredOrigins = [
+    process.env.FRONTEND_URL,
+    process.env.CORS_ORIGINS
+]
+    .filter(Boolean)
+    .flatMap(value => value.split(','))
+    .map(value => value.trim())
+    .filter(Boolean);
+
+const allowedOrigins = [...new Set([...defaultOrigins, ...configuredOrigins])];
+
 // CORS - izinkan frontend akses
 app.use(cors({
-    origin: ['http://localhost:3001', 'http://localhost:3000', 'http://127.0.0.1:3001', 'https://recruitai-peach.vercel.app'],
+    origin: (origin, callback) => {
+        if (!origin || allowedOrigins.includes(origin)) {
+            return callback(null, true);
+        }
+        return callback(new Error(`Origin not allowed by CORS: ${origin}`));
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization']

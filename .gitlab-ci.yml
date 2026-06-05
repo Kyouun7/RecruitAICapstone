@@ -1,0 +1,67 @@
+stages:
+  - build
+  - deploy
+
+variables:
+  DEPLOY_BRANCH: "main"
+  COMPOSE_FILE: "docker-compose.prod.yml"
+  COMPOSE_PROJECT_NAME: "recruitai"
+  DOCKER_BUILDKIT: "1"
+
+default:
+  tags:
+    - exec-shell
+
+workflow:
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $DEPLOY_BRANCH'
+    - when: never
+
+build_images:
+  stage: build
+  before_script:
+    - docker version
+    - docker compose version
+    - test -n "$MYSQL_ROOT_PASSWORD"
+    - test -n "$DB_USER"
+    - test -n "$DB_PASSWORD"
+    - test -n "$DB_NAME"
+    - test -n "$JWT_SECRET"
+    - test -n "$FRONTEND_URL"
+    - test -n "$NEXT_PUBLIC_API_URL"
+    - test -n "$N8N_WEBHOOK_URL"
+  script:
+    - docker compose -f "$COMPOSE_FILE" config
+    - docker compose -f "$COMPOSE_FILE" build --pull backend frontend
+
+deploy_production:
+  stage: deploy
+  environment:
+    name: production
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $DEPLOY_BRANCH'
+      when: on_success
+  before_script:
+    - docker version
+    - docker compose version
+    - test -n "$MYSQL_ROOT_PASSWORD"
+    - test -n "$DB_USER"
+    - test -n "$DB_PASSWORD"
+    - test -n "$DB_NAME"
+    - test -n "$JWT_SECRET"
+    - test -n "$FRONTEND_URL"
+    - test -n "$NEXT_PUBLIC_API_URL"
+    - test -n "$N8N_WEBHOOK_URL"
+  script:
+    - docker compose -f "$COMPOSE_FILE" pull mysql
+    - docker compose -f "$COMPOSE_FILE" build --pull
+    - docker compose -f "$COMPOSE_FILE" up -d --remove-orphans
+    - docker compose -f "$COMPOSE_FILE" ps
+    - |
+      for i in $(seq 1 30); do
+        if docker compose -f "$COMPOSE_FILE" exec -T backend node -e "fetch('http://127.0.0.1:' + (process.env.PORT || 3000) + '/health').then(async r => { if (!r.ok) throw new Error(await r.text()); console.log(await r.text()); }).catch(err => { console.error(err.message); process.exit(1); })"; then
+          exit 0
+        fi
+        sleep 2
+      done
+      exit 1

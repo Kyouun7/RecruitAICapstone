@@ -1,1 +1,19 @@
 .claude
+
+# Dependencies/build output
+node_modules/
+frontend/.next/
+frontend/out/
+dist/
+
+# Environment files with secrets
+.env
+.env.*
+!.env.example
+!.env.*.example
+
+# Runtime data/uploads
+backend/uploads/
+n8n-docker/n8n_data/
+.run-logs/
+.db-backups/
