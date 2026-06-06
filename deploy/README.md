@@ -30,14 +30,17 @@ NEXT_PUBLIC_API_URL=https://api.example.com
 N8N_WEBHOOK_URL=https://workflow.jagr.id/webhook/candidate
 ```
 
+For temporary Cloudflare tunnel deployment, remove or leave `NEXT_PUBLIC_API_URL` empty so the frontend calls the backend through the same public tunnel path (`/api`).
+
 ## Deploy flow
 
 On push to `DEPLOY_BRANCH`, GitLab will:
 
 1. Validate the Docker Compose production config.
 2. Build backend and frontend Docker images on the VM.
-3. Start/update `mysql`, `backend`, and `frontend` with Docker Compose.
+3. Start/update `mysql`, `backend`, `frontend`, `gateway`, and `tunnel` with Docker Compose.
 4. Check backend `/health`.
+5. Print a temporary `https://*.trycloudflare.com` URL from the tunnel logs.
 
 MySQL data is stored in the Docker volume `recruitai_mysql_data`. Do not remove this volume unless you intentionally want to reset production data.
 
@@ -58,3 +61,9 @@ https://api.example.com/api/n8n/update-result
 ```
 
 Replace `api.example.com` with the real backend domain.
+
+For a temporary tunnel demo, use the printed `trycloudflare.com` URL:
+
+```text
+https://<printed-url>/api/n8n/update-result
+```

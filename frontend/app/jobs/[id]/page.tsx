@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
 async function getJob(id: string) {
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+  const apiUrl = process.env.INTERNAL_API_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
   const res = await fetch(`${apiUrl}/api/jobs/${id}`, { cache: 'no-store' });
   if (!res.ok) { if (res.status === 404) return null; throw new Error('Gagal mengambil data lowongan'); }
   const data = await res.json();
