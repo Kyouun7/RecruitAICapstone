@@ -18,7 +18,7 @@ export default function SuccessView({ formData, fileName, onReset }: SuccessView
   ];
 
   return (
-    <div className="bg-surface-lowest rounded-xl border border-surface-highest shadow-sm p-12 px-6 text-center">
+    <div className="bg-surface-lowest rounded-xl border border-surface-highest shadow-sm p-6 sm:p-12 px-4 sm:px-6 text-center">
       {/* Animated check circle */}
       <div className="w-[72px] h-[72px] rounded-full bg-success-bg flex items-center justify-center mx-auto mb-5 animate-pop-in">
         <CheckCircleIcon />

@@ -49,7 +49,7 @@ export default function AdminHeader() {
         <div className="flex-1 flex items-center gap-4">
           <Link href="/" className="text-xl font-bold text-primary font-headline tracking-tight">RecruitAI</Link>
         </div>
-        <div className="flex items-center gap-6 relative" ref={dropdownRef}>
+        <div className="flex items-center gap-2 sm:gap-6 relative" ref={dropdownRef}>
           <div className="flex items-center gap-4 text-on-surface-variant">
             <button className="hover:text-primary hover:bg-surface-container-low p-2 rounded-full transition-colors flex items-center justify-center relative">
               <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 0" }}>notifications</span>

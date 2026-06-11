@@ -9,7 +9,7 @@ interface RoleRequirementsCardProps {
 
 export default function RoleRequirementsCard({ aboutRole, responsibilities, qualifications, onFieldChange }: RoleRequirementsCardProps) {
   return (
-    <section className="bg-surface-lowest rounded-xl p-8 shadow-[0_12px_32px_-4px_rgba(25,28,29,0.06)]">
+    <section className="bg-surface-lowest rounded-xl p-5 sm:p-8 shadow-[0_12px_32px_-4px_rgba(25,28,29,0.06)]">
       <h2 className="text-xl font-headline font-semibold mb-6 flex items-center gap-2">
         <span className="material-symbols-outlined text-primary">description</span>
         Peran &amp; Persyaratan

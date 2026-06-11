@@ -326,9 +326,9 @@ export default function JobDetailPage() {
       <div className="pt-2">
 
         {/* ===== TOP HEADER ===== */}
-        <div className="flex items-start justify-between mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-start justify-between mb-6 sm:mb-8 gap-4">
           <div>
-            <h2 className="text-3xl font-headline font-bold text-on-surface mb-1">
+            <h2 className="text-2xl sm:text-3xl font-headline font-bold text-on-surface mb-1">
               {job ? job.title : 'Memuat...'}
             </h2>
             <div className="flex items-center flex-wrap gap-3 text-sm text-on-surface-variant mt-1">

@@ -13,7 +13,7 @@ interface AIConfigurationCardProps {
 
 export default function AIConfigurationCard({ aiMatchScore, autoEmailQualified, autoEmailRegret, onScoreChange, onToggleQualified, onToggleRegret }: AIConfigurationCardProps) {
   return (
-    <section className="bg-primary/5 border border-primary/10 rounded-xl p-8 shadow-[0_12px_32px_-4px_rgba(25,28,29,0.06)] relative overflow-hidden">
+    <section className="bg-primary/5 border border-primary/10 rounded-xl p-5 sm:p-8 shadow-[0_12px_32px_-4px_rgba(25,28,29,0.06)] relative overflow-hidden">
       <div className="absolute top-0 right-0 p-8 opacity-5 pointer-events-none">
         <span className="material-symbols-outlined text-8xl" style={{ fontVariationSettings: '"FILL" 1' }}>auto_awesome</span>
       </div>
@@ -21,7 +21,7 @@ export default function AIConfigurationCard({ aiMatchScore, autoEmailQualified, 
         <span className="material-symbols-outlined">psychology</span>
         Konfigurasi Kecerdasan AI
       </h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
         <div>
           <div className="flex justify-between items-center mb-4">
             <label className="block text-xs font-semibold text-primary uppercase tracking-wider">Skor Kecocokan AI Minimum</label>

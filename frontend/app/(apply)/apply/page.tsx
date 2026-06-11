@@ -238,7 +238,7 @@ function ApplyFormContent() {
       <div className="max-w-2xl mx-auto">
         {/* Header Section */}
         <header className="text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-extrabold text-primary tracking-tight mb-2 font-headline">
+          <h1 className="text-3xl md:text-5xl font-extrabold text-primary tracking-tight mb-2 font-headline">
             {job.title}
           </h1>
           <p className="text-on-surface-variant font-medium flex items-center justify-center gap-2">

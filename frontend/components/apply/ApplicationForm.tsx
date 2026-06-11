@@ -91,7 +91,7 @@ export default function ApplicationForm({
   ];
 
   return (
-    <div className="bg-surface-lowest rounded-xl p-8 md:p-12 shadow-sm border border-surface-highest">
+    <div className="bg-surface-lowest rounded-xl p-5 sm:p-8 md:p-12 shadow-sm border border-surface-highest">
       <form className="space-y-8" onSubmit={(e) => { e.preventDefault(); onSubmit(); }}>
         {/* Full Name */}
         <FormInput

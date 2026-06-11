@@ -114,7 +114,7 @@ export default function ProfilePage() {
 
         {/* Header */}
         <div className="mb-8">
-          <h2 className="text-3xl font-headline font-bold text-on-surface mb-1">My Profile</h2>
+          <h2 className="text-2xl sm:text-3xl font-headline font-bold text-on-surface mb-1">My Profile</h2>
           <p className="text-sm text-on-surface-variant">Kelola informasi akun dan keamanan HR Anda.</p>
         </div>
 
@@ -139,7 +139,7 @@ export default function ProfilePage() {
                 )}
               </div>
               {!isLoading && (
-                <div className="flex gap-2 mt-3">
+                <div className="flex gap-2 mt-3 flex-wrap justify-end">
                   {saveSuccess && (
                     <span className="flex items-center gap-1 text-xs font-medium text-[#006c4d] bg-[#f0fdf4] px-3 py-1.5 rounded-full border border-[#006c4d]/20">
                       <span className="material-symbols-outlined text-[14px]">check_circle</span>
@@ -233,7 +233,7 @@ export default function ProfilePage() {
             <span className="material-symbols-outlined text-[18px] text-primary">person</span>
             Informasi Akun
           </h4>
-          <div className="grid grid-cols-2 gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             {[
               { label: 'Email', value: user?.email, icon: 'mail' },
               { label: 'Role', value: user?.role === 'hr' ? 'HR Manager' : user?.role, icon: 'badge' },

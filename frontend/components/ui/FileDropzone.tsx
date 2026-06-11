@@ -43,7 +43,7 @@ export default function FileDropzone({
           onDrop={onDrop}
           onClick={onFileSelect}
           className={`
-            border-2 border-dashed rounded-xl p-10 flex flex-col items-center justify-center
+            border-2 border-dashed rounded-xl p-6 sm:p-10 flex flex-col items-center justify-center
             text-center cursor-pointer transition-all group
             ${isDragging
               ? 'border-primary bg-surface-low'
