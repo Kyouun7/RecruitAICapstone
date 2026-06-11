@@ -21,7 +21,7 @@ export default async function JobDetailPage({ params }: { params: Promise<{ id: 
 
   return (
     <main className="min-h-screen bg-[#f5f7fa]">
-      <div className="bg-gradient-to-br from-[#001e40] via-[#002a5c] to-[#003366] pt-24 pb-16 px-6">
+      <div className="bg-gradient-to-br from-[#001e40] via-[#002a5c] to-[#003366] pt-24 pb-12 px-4 sm:px-6">
         <div className="max-w-5xl mx-auto">
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-8">
             <div className="flex items-start gap-5">
@@ -61,10 +61,10 @@ export default async function JobDetailPage({ params }: { params: Promise<{ id: 
         </div>
       </div>
 
-      <div className="max-w-5xl mx-auto px-6 py-10">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
           <div className="lg:col-span-2 space-y-6">
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-8">
+            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 sm:p-8">
               <div className="flex items-center gap-3 mb-5">
                 <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center"><span className="material-symbols-outlined text-primary text-[20px]">description</span></div>
                 <h2 className="text-lg font-bold text-[#001e40]">Tentang Posisi Ini</h2>
@@ -73,7 +73,7 @@ export default async function JobDetailPage({ params }: { params: Promise<{ id: 
             </div>
 
             {responsibilities.length > 0 && (
-              <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-8">
+              <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 sm:p-8">
                 <div className="flex items-center gap-3 mb-5">
                   <div className="w-9 h-9 rounded-lg bg-emerald-50 flex items-center justify-center"><span className="material-symbols-outlined text-emerald-600 text-[20px]">checklist</span></div>
                   <h2 className="text-lg font-bold text-[#001e40]">Tanggung Jawab Utama</h2>
@@ -90,7 +90,7 @@ export default async function JobDetailPage({ params }: { params: Promise<{ id: 
             )}
 
             {qualifications.length > 0 && (
-              <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-8">
+              <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 sm:p-8">
                 <div className="flex items-center gap-3 mb-5">
                   <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center"><span className="material-symbols-outlined text-primary text-[20px]">school</span></div>
                   <h2 className="text-lg font-bold text-[#001e40]">Persyaratan &amp; Kualifikasi</h2>

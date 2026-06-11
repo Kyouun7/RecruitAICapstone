@@ -352,7 +352,7 @@ export default function JobDetailPage() {
               )}
             </div>
           </div>
-          <div className="flex items-center gap-2 flex-shrink-0 mt-1">
+          <div className="flex items-center gap-2 flex-shrink-0 mt-1 flex-wrap">
             <button onClick={() => router.push('/dashboard')} className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium border border-gray-200 rounded-lg text-gray-500 hover:bg-gray-50 hover:text-primary transition-colors">
               <span className="material-symbols-outlined text-[16px]">arrow_back</span>
               Kembali
@@ -365,7 +365,7 @@ export default function JobDetailPage() {
         </div>
 
         {/* ===== STATS ROW: Total Pendaftar + Kandidat Lolos Ambang Batas ===== */}
-        <div className="grid grid-cols-2 gap-5 mb-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5 mb-6">
 
           {/* Total Pendaftar */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
@@ -433,7 +433,7 @@ export default function JobDetailPage() {
         {!isLoading && topCandidates.length > 0 && (
           <div className="mb-6">
             <h3 className="text-base font-bold text-on-surface mb-4 font-headline">Papan Peringkat Kandidat Terbaik</h3>
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               {topCandidates.map((c, idx) => {
                 const scoreColor = c.score! >= 80 ? '#006c4d' : c.score! >= 60 ? '#d97706' : '#ba1a1a';
                 const medalStyles = [
@@ -512,8 +512,8 @@ export default function JobDetailPage() {
             </div>
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm text-left">
+          <div className="overflow-x-auto -mx-4 sm:mx-0">
+            <table className="w-full text-sm text-left min-w-[560px]">
               <thead>
                 <tr className="bg-gray-50 text-gray-500 text-xs uppercase tracking-wider border-b border-gray-100">
                   <th className="px-6 py-3 font-semibold">Nama Kandidat</th>

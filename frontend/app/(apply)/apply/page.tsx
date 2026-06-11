@@ -234,7 +234,7 @@ function ApplyFormContent() {
 
   // ===== RENDER MAIN FORM =====
   return (
-    <main className="flex-grow pt-32 pb-24 px-4 md:px-6">
+    <main className="flex-grow pt-24 sm:pt-32 pb-16 sm:pb-24 px-4 sm:px-6">
       <div className="max-w-2xl mx-auto">
         {/* Header Section */}
         <header className="text-center mb-12">

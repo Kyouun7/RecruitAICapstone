@@ -119,9 +119,9 @@ export default function DashboardPage() {
     <AdminLayout>
 
       {/* ===== HEADER ===== */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-3">
         <div>
-          <h2 className="text-3xl font-headline font-bold text-on-surface mb-1">Dasbor Rekrutmen</h2>
+          <h2 className="text-2xl sm:text-3xl font-headline font-bold text-on-surface mb-1">Dasbor Rekrutmen</h2>
           <p className="text-on-surface-variant text-sm">Pantau performa rekrutmen Anda secara real-time.</p>
         </div>
         <div className="flex items-center gap-1 bg-surface-container-low rounded-lg p-1 border border-outline-variant/20">
@@ -190,8 +190,8 @@ export default function DashboardPage() {
               </Link>
             </div>
           </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm text-left">
+          <div className="overflow-x-auto -mx-4 sm:mx-0">
+            <table className="w-full text-sm text-left min-w-[600px]">
               <thead>
                 <tr className="bg-surface-container-low text-on-surface-variant text-xs uppercase tracking-wider border-b border-outline-variant/15">
                   <th className="px-6 py-3 font-semibold">Judul Posisi</th>

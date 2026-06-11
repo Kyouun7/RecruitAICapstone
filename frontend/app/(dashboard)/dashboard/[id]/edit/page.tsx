@@ -151,7 +151,7 @@ export default function EditJobPage() {
         </div>
         <div className="space-y-8">
           {[...Array(3)].map((_, i) => (
-            <div key={i} className="bg-white rounded-xl p-8 border border-gray-100 animate-pulse">
+            <div key={i} className="bg-white rounded-xl p-5 sm:p-8 border border-gray-100 animate-pulse">
               <div className="h-6 bg-surface-container-high rounded w-48 mb-4" />
               <div className="space-y-3">
                 <div className="h-10 bg-surface-container-high rounded" />
@@ -168,7 +168,7 @@ export default function EditJobPage() {
     <AdminLayout>
       {/* Page Header */}
       <div className="mb-10">
-        <h1 className="text-4xl font-headline font-bold text-on-surface tracking-tight mb-2">
+        <h1 className="text-2xl sm:text-4xl font-headline font-bold text-on-surface tracking-tight mb-2">
           Edit Job Vacancy
         </h1>
         <p className="text-on-surface-variant font-body">

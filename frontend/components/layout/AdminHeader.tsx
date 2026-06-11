@@ -45,7 +45,7 @@ export default function AdminHeader() {
 
   return (
     <>
-      <header className="sticky top-0 z-40 w-full bg-white border-b border-gray-100 px-8 py-3 flex justify-between items-center h-16">
+      <header className="sticky top-0 z-40 w-full bg-white border-b border-gray-100 px-4 sm:px-8 py-3 flex justify-between items-center h-16">
         <div className="flex-1 flex items-center gap-4">
           <Link href="/" className="text-xl font-bold text-primary font-headline tracking-tight">RecruitAI</Link>
         </div>

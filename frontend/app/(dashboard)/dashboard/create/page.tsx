@@ -55,7 +55,7 @@ export default function CreateJobPage() {
   return (
     <AdminLayout>
       <div className="mb-10">
-        <h1 className="text-4xl font-headline font-bold text-on-surface tracking-tight mb-2">Buat Lowongan Baru</h1>
+        <h1 className="text-2xl sm:text-4xl font-headline font-bold text-on-surface tracking-tight mb-2">Buat Lowongan Baru</h1>
         <p className="text-on-surface-variant font-body">Atur detail lowongan dan konfigurasi parameter penyaringan AI untuk pemfilteran kandidat otomatis.</p>
       </div>
       <div className="space-y-8">
