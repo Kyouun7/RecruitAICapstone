@@ -29,16 +29,16 @@ export default function FAQSection() {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
   return (
-    <section className="py-24 bg-white">
-      <div className="max-w-3xl mx-auto px-8">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl font-bold text-primary mb-4 font-headline">Pertanyaan Umum</h2>
-          <p className="text-on-surface-variant text-lg">
+    <section className="py-16 md:py-24 bg-white">
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center mb-10 md:mb-16">
+          <h2 className="text-3xl sm:text-4xl font-bold text-primary mb-3 md:mb-4 font-headline">Pertanyaan Umum</h2>
+          <p className="text-on-surface-variant text-base sm:text-lg">
             Jawaban atas pertanyaan yang paling sering diajukan calon pengguna RecruitAI.
           </p>
         </div>
 
-        <div className="space-y-4">
+        <div className="space-y-3 md:space-y-4">
           {faqs.map((faq, i) => {
             const isOpen = openIndex === i;
             return (
@@ -51,7 +51,7 @@ export default function FAQSection() {
                 }`}
               >
                 <button
-                  className="w-full flex items-center justify-between gap-4 px-6 py-5 text-left"
+                  className="w-full flex items-center justify-between gap-3 px-5 md:px-6 py-4 md:py-5 text-left"
                   onClick={() => setOpenIndex(isOpen ? null : i)}
                 >
                   <span className="font-semibold text-on-surface text-sm leading-snug pr-2">
@@ -66,7 +66,7 @@ export default function FAQSection() {
                   </span>
                 </button>
                 {isOpen && (
-                  <div className="px-6 pb-5">
+                  <div className="px-5 md:px-6 pb-4 md:pb-5">
                     <p className="text-on-surface-variant text-sm leading-relaxed">{faq.a}</p>
                   </div>
                 )}

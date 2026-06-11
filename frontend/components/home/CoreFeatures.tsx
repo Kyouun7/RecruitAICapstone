@@ -18,26 +18,26 @@ export default function CoreFeatures() {
   ];
 
   return (
-    <section className="py-24">
-      <div className="max-w-7xl mx-auto px-8">
+    <section className="py-16 md:py-24">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
         {/* Section header */}
-        <div className="text-center mb-16">
+        <div className="text-center mb-10 md:mb-16">
           <div className="inline-flex items-center gap-2 px-3 py-1 bg-secondary-container text-on-secondary-container rounded-full text-xs font-bold tracking-wide uppercase mb-4">
             <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
             Fitur Unggulan
           </div>
-          <h2 className="text-4xl font-bold text-primary leading-tight font-headline">
+          <h2 className="text-3xl sm:text-4xl font-bold text-primary leading-tight font-headline">
             Dirancang untuk mengatasi kelelahan rekruter modern.
           </h2>
         </div>
 
-        {/* Side by side */}
-        <div className="grid lg:grid-cols-2 gap-16 items-center">
+        {/* Side by side — stack on mobile */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center">
 
-          {/* LEFT: Dashboard mockup */}
-          <div className="relative">
-            <div className="bg-surface-container-low rounded-3xl p-4 border border-outline-variant/10 shadow-xl">
+          {/* LEFT: Dashboard mockup — sembunyikan di mobile kecil */}
+          <div className="relative hidden sm:block">
+            <div className="bg-surface-container-low rounded-3xl p-3 md:p-4 border border-outline-variant/10 shadow-xl">
               {/* Browser bar mockup */}
               <div className="flex items-center gap-2 px-4 py-3 bg-white rounded-2xl mb-3 border border-outline-variant/10">
                 <div className="flex gap-1.5">
@@ -51,8 +51,7 @@ export default function CoreFeatures() {
               </div>
 
               {/* Dashboard UI mockup */}
-              <div className="bg-white rounded-2xl p-5 space-y-4">
-                {/* Header */}
+              <div className="bg-white rounded-2xl p-4 md:p-5 space-y-4">
                 <div className="flex items-center justify-between mb-2">
                   <div>
                     <div className="h-4 w-32 bg-primary/20 rounded-md mb-1" />
@@ -62,18 +61,14 @@ export default function CoreFeatures() {
                     <div className="h-3 w-16 bg-white/60 rounded" />
                   </div>
                 </div>
-
-                {/* Stats row */}
                 <div className="grid grid-cols-3 gap-3">
                   {['bg-primary/10', 'bg-secondary-container/60', 'bg-surface-container-high'].map((bg, i) => (
-                    <div key={i} className={`${bg} rounded-xl p-4`}>
+                    <div key={i} className={`${bg} rounded-xl p-3 md:p-4`}>
                       <div className="h-6 w-12 bg-primary/30 rounded mb-2" />
                       <div className="h-2.5 w-16 bg-surface-container-highest rounded" />
                     </div>
                   ))}
                 </div>
-
-                {/* Candidate list */}
                 <div className="space-y-2.5">
                   {[92, 85, 78, 71].map((score, i) => (
                     <div key={i} className="flex items-center gap-3 p-3 rounded-xl bg-surface-container-low border border-outline-variant/10">
@@ -91,31 +86,26 @@ export default function CoreFeatures() {
                 </div>
               </div>
             </div>
-
-            {/* Floating badge */}
-            <div className="absolute -bottom-5 -right-5 bg-primary text-white px-5 py-3 rounded-2xl shadow-xl text-sm font-bold">
+            <div className="absolute -bottom-5 -right-5 bg-primary text-white px-4 py-2.5 rounded-2xl shadow-xl text-sm font-bold">
               kandidat diranking otomatis
             </div>
           </div>
 
           {/* RIGHT: Feature list */}
-          <div className="space-y-5">
+          <div className="space-y-4 md:space-y-5">
             {features.map((f, i) => (
               <div
                 key={i}
-                className="flex items-start gap-5 bg-surface-container-low rounded-2xl p-6 border border-outline-variant/10 hover:shadow-md transition-shadow group"
+                className="flex items-start gap-4 md:gap-5 bg-surface-container-low rounded-2xl p-5 md:p-6 border border-outline-variant/10 hover:shadow-md transition-shadow group"
               >
-                <div className="w-12 h-12 bg-primary text-white rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
-                  <span
-                    className="material-symbols-outlined text-2xl"
-                    style={{ fontVariationSettings: "'FILL' 1" }}
-                  >
+                <div className="w-11 h-11 md:w-12 md:h-12 bg-primary text-white rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                  <span className="material-symbols-outlined text-xl md:text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>
                     {f.icon}
                   </span>
                 </div>
                 <div>
-                  <h3 className="text-base font-bold text-primary mb-1 font-headline">{f.title}</h3>
-                  <p className="text-sm text-on-surface-variant leading-relaxed">{f.desc}</p>
+                  <h3 className="text-sm md:text-base font-bold text-primary mb-1 font-headline">{f.title}</h3>
+                  <p className="text-xs md:text-sm text-on-surface-variant leading-relaxed">{f.desc}</p>
                 </div>
               </div>
             ))}

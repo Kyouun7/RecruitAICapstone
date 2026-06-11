@@ -52,20 +52,20 @@ export default function PricingSection() {
   ];
 
   return (
-    <section className="py-24 bg-surface-container-low">
-      <div className="max-w-7xl mx-auto px-8">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl font-bold text-primary mb-4 font-headline">Harga &amp; Paket</h2>
-          <p className="text-on-surface-variant max-w-2xl mx-auto text-lg">
+    <section className="py-16 md:py-24 bg-surface-container-low">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center mb-10 md:mb-16">
+          <h2 className="text-3xl sm:text-4xl font-bold text-primary mb-3 md:mb-4 font-headline">Harga &amp; Paket</h2>
+          <p className="text-on-surface-variant max-w-2xl mx-auto text-base sm:text-lg">
             Pilih paket yang sesuai kebutuhan tim HR Anda. Mulai gratis, upgrade kapan saja.
           </p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-8 items-stretch">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 md:gap-8 items-stretch">
           {plans.map((plan, i) => (
             <div
               key={i}
-              className={`relative flex flex-col rounded-3xl border p-10 shadow-sm transition-shadow hover:shadow-md
+              className={`relative flex flex-col rounded-3xl border p-7 md:p-10 shadow-sm transition-shadow hover:shadow-md
                 ${plan.highlighted
                   ? 'bg-primary text-white border-primary'
                   : 'bg-white text-on-surface border-outline-variant/20'
@@ -79,12 +79,12 @@ export default function PricingSection() {
                 </div>
               )}
 
-              <div className="mb-8">
-                <h3 className={`text-lg font-bold mb-1 font-headline ${plan.highlighted ? 'text-white/80' : 'text-on-surface-variant'}`}>
+              <div className="mb-6 md:mb-8">
+                <h3 className={`text-base md:text-lg font-bold mb-1 font-headline ${plan.highlighted ? 'text-white/80' : 'text-on-surface-variant'}`}>
                   {plan.name}
                 </h3>
                 <div className="flex items-end gap-1 mb-2">
-                  <span className={`text-4xl font-black font-headline ${plan.highlighted ? 'text-white' : 'text-primary'}`}>
+                  <span className={`text-3xl md:text-4xl font-black font-headline ${plan.highlighted ? 'text-white' : 'text-primary'}`}>
                     {plan.price}
                   </span>
                   {plan.period && (
@@ -98,7 +98,7 @@ export default function PricingSection() {
                 </p>
               </div>
 
-              <ul className="space-y-3 flex-1 mb-10">
+              <ul className="space-y-3 flex-1 mb-8 md:mb-10">
                 {plan.features.map((feat, j) => (
                   <li key={j} className="flex items-start gap-3 text-sm">
                     <span
@@ -116,7 +116,7 @@ export default function PricingSection() {
 
               <Link href={plan.href}>
                 <button
-                  className={`w-full py-3.5 rounded-xl font-bold text-sm transition-all active:scale-95
+                  className={`w-full py-3 md:py-3.5 rounded-xl font-bold text-sm transition-all active:scale-95
                     ${plan.highlighted
                       ? 'bg-white text-primary hover:bg-white/90 shadow-lg'
                       : 'bg-gradient-to-br from-[#001e40] to-[#003366] text-white hover:shadow-lg'
