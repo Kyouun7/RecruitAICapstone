@@ -146,8 +146,6 @@ function isValidEmail(email) {
     return regex.test(email);
 }
 
-module.exports = { register, login, getMe };
-
 // FORGOT PASSWORD
 async function forgotPassword(req, res) {
     try {

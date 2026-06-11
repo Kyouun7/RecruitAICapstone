@@ -1,1 +1,50 @@
+# Claude
 .claude
+
+# Environment files — semua layer
+.env
+.env.local
+.env*.local
+.env.production
+.env.development
+.env.backup
+
+# Dependencies
+node_modules/
+
+# Build output
+.next/
+dist/
+build/
+
+# Uploads (file CV kandidat)
+uploads/
+
+# Database backup — jangan push data asli
+*.sql
+!backend/src/db/schema.sql
+!backend/src/db/migrate_add_job_details.sql
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Google credentials
+client_secret.json
+token.json
+service-account-key.json
+
+# Vercel
+.vercel
+
+# n8n data
+n8n_data/
+
+# SSL/TLS
+*.pem
+*.key
+*.cert

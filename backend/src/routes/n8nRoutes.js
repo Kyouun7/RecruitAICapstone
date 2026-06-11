@@ -1,9 +1,28 @@
 const express = require('express');
 const db = require('../db/connection');
+require('dotenv').config();
 
 const router = express.Router();
 
-router.post('/update-result', async (req, res) => {
+// Middleware: validasi N8N_SECRET supaya hanya n8n yang bisa akses endpoint ini
+function verifyN8nSecret(req, res, next) {
+    const secret = req.headers['x-n8n-secret'] || req.body?.n8n_secret;
+    const expected = process.env.N8N_SECRET;
+
+    if (!expected) {
+        // Kalau N8N_SECRET belum diset di .env, lewatkan (dev mode)
+        console.warn('⚠️  N8N_SECRET not set in .env — n8n endpoint is unprotected!');
+        return next();
+    }
+
+    if (secret !== expected) {
+        return res.status(401).json({ success: false, message: 'Unauthorized: invalid n8n secret' });
+    }
+
+    next();
+}
+
+router.post('/update-result', verifyN8nSecret, async (req, res) => {
     try {
         const { candidate_id, score, status, justifikasi, extracted_text, email_status } = req.body;
         if (!candidate_id) return res.status(400).json({ success: false, message: 'candidate_id required' });
@@ -37,7 +56,7 @@ router.post('/update-result', async (req, res) => {
     }
 });
 
-router.get('/jobs/:job_id', async (req, res) => {
+router.get('/jobs/:job_id', verifyN8nSecret, async (req, res) => {
     try {
         const { job_id } = req.params;
         const [jobs] = await db.execute('SELECT * FROM jobs WHERE job_id = ?', [job_id]);

@@ -4,7 +4,13 @@ const storage = multer.memoryStorage();
 
 const upload = multer({
     storage: storage,
-    limits: { fileSize: 5 * 1024 * 1024 }
+    limits: { fileSize: 5 * 1024 * 1024 },
+    fileFilter: (req, file, cb) => {
+        if (file.mimetype !== 'application/pdf') {
+            return cb(new Error('Hanya file PDF yang diperbolehkan'), false);
+        }
+        cb(null, true);
+    }
 });
 
 module.exports = upload;

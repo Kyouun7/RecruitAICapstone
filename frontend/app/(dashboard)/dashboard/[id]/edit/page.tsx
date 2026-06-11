@@ -114,26 +114,11 @@ export default function EditJobPage() {
   };
 
   try {
-    console.log('PAYLOAD:', payload);
-
-    const response = await api.put(`/api/jobs/${jobId}`, payload);
-
-    console.log('SUCCESS:', response.data);
-
+    await api.put(`/api/jobs/${jobId}`, payload);
     router.push(`/dashboard/${jobId}`);
-
   } catch (error: any) {
-    console.error('FULL ERROR:', error);
-
-    if (error.response) {
-      console.log('STATUS:', error.response.status);
-      console.log('RESPONSE DATA:', error.response.data);
-      console.log('HEADERS:', error.response.headers);
-    }
-
-    console.log('PAYLOAD:', payload);
-
-    alert('Gagal menyimpan perubahan. Cek console.');
+    const msg = error.response?.data?.message || 'Gagal menyimpan perubahan. Silakan coba lagi.';
+    alert(msg);
   } finally {
       setIsSubmitting(false);
     }

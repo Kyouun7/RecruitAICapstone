@@ -12,8 +12,12 @@ CREATE TABLE IF NOT EXISTS candidates (
     job_id VARCHAR(50) NOT NULL,
     cv_original_name VARCHAR(255),
     cv_url TEXT,
+    cv_google_drive_id VARCHAR(200) DEFAULT NULL,
     score INT DEFAULT NULL,
-    status ENUM('pending', 'processed', 'accepted', 'rejected') DEFAULT 'pending',
+    justifikasi TEXT DEFAULT NULL,
+    extracted_text TEXT DEFAULT NULL,
+    recruiter_note TEXT DEFAULT NULL,
+    status ENUM('pending', 'processing', 'processed', 'accepted', 'rejected') DEFAULT 'pending',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
@@ -54,6 +58,16 @@ CREATE TABLE IF NOT EXISTS password_resets (
     token VARCHAR(255) NOT NULL,
     expires_at DATETIME NOT NULL,
     used BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Tabel email_logs untuk mencatat email yang dikirim n8n
+CREATE TABLE IF NOT EXISTS email_logs (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    candidate_id VARCHAR(50) NOT NULL,
+    email_to VARCHAR(100) NOT NULL,
+    subject VARCHAR(255),
+    status VARCHAR(50),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 

@@ -71,7 +71,7 @@ export default function DashboardPage() {
             jobsData.map(async (job) => {
               try {
                 const candRes = await api.get(`/api/candidates?job_id=${job.job_id}`);
-                const count = candRes.data?.data?.length || 0;
+                const count = candRes.data?.pagination?.total ?? candRes.data?.data?.length ?? 0;
                 return { ...job, candidate_count: count };
               } catch {
                 return { ...job, candidate_count: 0 };

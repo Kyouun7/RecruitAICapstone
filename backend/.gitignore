@@ -1,9 +1,28 @@
 node_modules/
+
+# Environment
 .env
+.env.local
+.env*.local
 .env.backup
+
+# Uploads (file CV kandidat)
 uploads/
+
+# Database backup — berisi data asli, jangan push
+backup_db.sql
+backup_recruitmen_db.sql
+*.backup.sql
+
+# Logs
 *.log
+npm-debug.log*
+
+# OS
 .DS_Store
+Thumbs.db
+
+# Google credentials
 client_secret.json
 token.json
 service-account-key.json
