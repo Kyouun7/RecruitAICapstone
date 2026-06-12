@@ -1,0 +1,9 @@
+node_modules
+.env
+.env.*
+!.env.example
+uploads
+*.log
+client_secret.json
+token.json
+service-account-key.json

@@ -1,26 +1,32 @@
 # Claude
 .claude
 
-# Environment files — semua layer
+# Environment files
 .env
 .env.local
 .env*.local
 .env.production
 .env.development
 .env.backup
+.env.*
+!.env.example
+!.env.*.example
 
 # Dependencies
 node_modules/
 
 # Build output
 .next/
+frontend/.next/
+frontend/out/
 dist/
 build/
 
-# Uploads (file CV kandidat)
+# Uploads
 uploads/
+backend/uploads/
 
-# Database backup — jangan push data asli
+# Database backup
 *.sql
 !backend/src/db/schema.sql
 !backend/src/db/migrate_add_job_details.sql
@@ -28,6 +34,7 @@ uploads/
 # Logs
 *.log
 npm-debug.log*
+.run-logs/
 
 # OS
 .DS_Store
@@ -43,8 +50,12 @@ service-account-key.json
 
 # n8n data
 n8n_data/
+n8n-docker/n8n_data/
 
 # SSL/TLS
 *.pem
 *.key
 *.cert
+
+# Deployment
+.db-backups/

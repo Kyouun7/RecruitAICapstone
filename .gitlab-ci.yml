@@ -1,0 +1,124 @@
+stages:
+  - inspect
+  - build
+  - deploy
+
+variables:
+  DEPLOY_BRANCH: "main"
+  COMPOSE_FILE: "docker-compose.prod.yml"
+  COMPOSE_PROJECT_NAME: "recruitai"
+  DOCKER_BUILDKIT: "1"
+
+default:
+  tags:
+    - exec-shell
+
+workflow:
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $DEPLOY_BRANCH'
+    - when: never
+
+show_vm_ip:
+  stage: inspect
+  when: manual
+  allow_failure: true
+  script:
+    - echo "Hostname:"
+    - hostname
+    - echo "Local IP addresses:"
+    - hostname -I || true
+    - echo "Default route:"
+    - ip route || true
+    - echo "Public IP from external services:"
+    - curl -fsS https://ifconfig.me || true
+    - echo
+    - curl -fsS https://api.ipify.org || true
+    - echo
+
+check_backend_env:
+  stage: inspect
+  when: manual
+  allow_failure: true
+  script:
+    - docker compose -f "$COMPOSE_FILE" ps
+    - |
+      docker compose -f "$COMPOSE_FILE" exec -T backend node - <<'NODE'
+      const keys = [
+        'N8N_WEBHOOK_URL',
+        'GOOGLE_CLIENT_ID',
+        'GOOGLE_CLIENT_SECRET',
+        'GOOGLE_REFRESH_TOKEN',
+        'GOOGLE_DRIVE_FOLDER_ID',
+        'GOOGLE_REDIRECT_URI'
+      ];
+
+      for (const key of keys) {
+        const value = process.env[key] || '';
+        const label = value ? `SET length=${value.length}` : 'MISSING';
+        console.log(`${key}: ${label}`);
+      }
+      NODE
+    - docker compose -f "$COMPOSE_FILE" logs --tail=200 backend | grep -E "Google|OAuth|Drive|fallback|Webhook|webhook|CV uploaded|Missing" || true
+
+build_images:
+  stage: build
+  before_script:
+    - docker version
+    - docker compose version
+    - test -n "$MYSQL_ROOT_PASSWORD"
+    - test -n "$DB_USER"
+    - test -n "$DB_PASSWORD"
+    - test -n "$DB_NAME"
+    - test -n "$JWT_SECRET"
+    - test -n "$FRONTEND_URL"
+    - test -n "$N8N_WEBHOOK_URL"
+  script:
+    - docker compose -f "$COMPOSE_FILE" config
+    - docker compose -f "$COMPOSE_FILE" build --pull backend frontend
+
+deploy_production:
+  stage: deploy
+  environment:
+    name: production
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $DEPLOY_BRANCH'
+      when: on_success
+  before_script:
+    - docker version
+    - docker compose version
+    - test -n "$MYSQL_ROOT_PASSWORD"
+    - test -n "$DB_USER"
+    - test -n "$DB_PASSWORD"
+    - test -n "$DB_NAME"
+    - test -n "$JWT_SECRET"
+    - test -n "$FRONTEND_URL"
+    - test -n "$N8N_WEBHOOK_URL"
+  script:
+    - docker compose -f "$COMPOSE_FILE" pull mysql gateway tunnel
+    - docker compose -f "$COMPOSE_FILE" build --pull
+    - docker compose -f "$COMPOSE_FILE" up -d --remove-orphans
+    - docker compose -f "$COMPOSE_FILE" ps
+    - |
+      healthy=0
+      for i in $(seq 1 30); do
+        if docker compose -f "$COMPOSE_FILE" exec -T backend node -e "fetch('http://127.0.0.1:' + (process.env.PORT || 3000) + '/health').then(async r => { if (!r.ok) throw new Error(await r.text()); console.log(await r.text()); }).catch(err => { console.error(err.message); process.exit(1); })"; then
+          healthy=1
+          break
+        fi
+        sleep 2
+      done
+      if [ "$healthy" != "1" ]; then
+        exit 1
+      fi
+    - |
+      echo "Cloudflare temporary public URL:"
+      for i in $(seq 1 30); do
+        url=$(docker compose -f "$COMPOSE_FILE" logs --no-color tunnel 2>/dev/null | grep -oE 'https://[-a-z0-9]+\.trycloudflare\.com' | tail -n 1 || true)
+        if [ -n "$url" ]; then
+          echo "$url"
+          exit 0
+        fi
+        sleep 2
+      done
+      echo "Tunnel URL was not found yet. Recent tunnel logs:"
+      docker compose -f "$COMPOSE_FILE" logs --tail=200 tunnel || true

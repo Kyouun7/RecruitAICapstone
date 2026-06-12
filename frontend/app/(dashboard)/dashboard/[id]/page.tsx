@@ -128,7 +128,8 @@ function CVDrawer({
   } else if (candidate.cv_url && candidate.cv_url.startsWith('http')) {
     cvUrl = candidate.cv_url;
   } else if (candidate.cv_url) {
-    cvUrl = `${process.env.NEXT_PUBLIC_API_URL}${candidate.cv_url}`;
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL?.trim() || '';
+    cvUrl = `${apiUrl}${candidate.cv_url}`;
   }
 
   const scoreColor = score === null ? '#737780' : score >= 80 ? '#006c4d' : score >= 60 ? '#d97706' : '#ba1a1a';
@@ -253,7 +254,7 @@ export default function JobDetailPage() {
   useEffect(() => {
     async function fetchJob() {
       try {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL?.trim() || '';
         const res = await fetch(`${apiUrl}/api/jobs/${jobId}`);
         const data = await res.json();
         if (data.success) setJob(data.data);
