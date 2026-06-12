@@ -13,35 +13,32 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-const defaultOrigins = [
+// CORS - izinkan semua origin yang valid
+const allowedOrigins = [
     'http://localhost:3001',
     'http://localhost:3000',
     'http://127.0.0.1:3001',
-    'https://recruitai-peach.vercel.app'
+    'http://127.0.0.1:3000',
+    'https://recruitai-peach.vercel.app',
 ];
 
-const configuredOrigins = [
-    process.env.FRONTEND_URL,
-    process.env.CORS_ORIGINS
-]
-    .filter(Boolean)
-    .flatMap(value => value.split(','))
-    .map(value => value.trim())
-    .filter(Boolean);
-
-const allowedOrigins = [...new Set([...defaultOrigins, ...configuredOrigins])];
-
-// CORS - izinkan frontend akses
 app.use(cors({
-    origin: (origin, callback) => {
-        if (!origin || allowedOrigins.includes(origin)) {
+    origin: function (origin, callback) {
+        // Izinkan request tanpa origin (misal: Postman, curl)
+        if (!origin) return callback(null, true);
+        // Izinkan semua subdomain trycloudflare.com dan vercel.app
+        if (
+            allowedOrigins.includes(origin) ||
+            /\.trycloudflare\.com$/.test(origin) ||
+            /\.vercel\.app$/.test(origin)
+        ) {
             return callback(null, true);
         }
-        return callback(new Error(`Origin not allowed by CORS: ${origin}`));
+        callback(new Error('Not allowed by CORS'));
     },
     credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization']
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 
 app.use(express.json());
@@ -54,6 +51,7 @@ app.use('/api/jobs', jobRoutes);
 app.use('/api/n8n', n8nRoutes);
 const dashboardRoutes = require('./src/routes/dashboardRoutes');
 app.use('/api/dashboard', dashboardRoutes);
+
 app.get('/health', async (req, res) => {
     try {
         await db.query('SELECT 1');
@@ -72,6 +70,9 @@ app.listen(PORT, () => {
 });
 
 app.use((err, req, res, next) => {
+    if (err.message === 'Not allowed by CORS') {
+        return res.status(403).json({ success: false, message: 'CORS: origin tidak diizinkan' });
+    }
     if (err.code === 'LIMIT_FILE_SIZE') {
         return res.status(400).json({ success: false, message: 'File maksimal 5MB' });
     }

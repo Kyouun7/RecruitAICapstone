@@ -35,9 +35,17 @@ export default function EditJobPage() {
   const [notFound, setNotFound] = useState(false);
   const [activeStep, setActiveStep] = useState(1);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [saveError, setSaveError] = useState('');
+  const [saveSuccess, setSaveSuccess] = useState(false);
 
   useEffect(() => {
     async function fetchJob() {
+      // Cek token dulu sebelum fetch
+      const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+      if (!token) {
+        router.push('/login');
+        return;
+      }
       try {
         const res = await api.get(`/api/jobs/${jobId}`);
         if (res.data.success) {
@@ -54,16 +62,28 @@ export default function EditJobPage() {
             autoEmailQualified: true,
             autoEmailRegret: false,
           });
-        } else { setNotFound(true); }
-      } catch { setNotFound(true); }
-      finally { setIsLoading(false); }
+        } else {
+          setNotFound(true);
+        }
+      } catch (err: any) {
+        if (err.response?.status === 404) {
+          setNotFound(true);
+        } else if (err.response?.status === 401) {
+          router.push('/login');
+        } else {
+          setNotFound(true);
+        }
+      } finally {
+        setIsLoading(false);
+      }
     }
     if (jobId) fetchJob();
-  }, [jobId]);
+  }, [jobId, router]);
 
   const handleFieldChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
     if (errors[field]) setErrors((prev) => { const e = { ...prev }; delete e[field]; return e; });
+    setSaveError('');
   };
   const handleScoreChange = (value: number) => setFormData((prev) => ({ ...prev, aiMatchScore: value }));
   const handleToggleQualified = () => setFormData((prev) => ({ ...prev, autoEmailQualified: !prev.autoEmailQualified }));
@@ -96,6 +116,8 @@ export default function EditJobPage() {
 
   const handleSave = async () => {
     if (!validateStep(activeStep)) return;
+    setSaveError('');
+    setSaveSuccess(false);
     setIsSubmitting(true);
     try {
       await api.put(`/api/jobs/${jobId}`, {
@@ -108,9 +130,22 @@ export default function EditJobPage() {
         minimum_qualifications: formData.qualifications,
         threshold_score: formData.aiMatchScore,
       });
-      router.push(`/dashboard/${jobId}`);
+      setSaveSuccess(true);
+      setTimeout(() => {
+        router.push(`/dashboard/${jobId}`);
+      }, 800);
     } catch (error: any) {
-      alert(error.response?.data?.message || 'Gagal menyimpan perubahan. Silakan coba lagi.');
+      const status = error.response?.status;
+      if (status === 401) {
+        setSaveError('Sesi login habis. Silakan login ulang.');
+        setTimeout(() => router.push('/login'), 1500);
+      } else if (status === 404) {
+        setSaveError('Lowongan tidak ditemukan di server.');
+      } else if (status === 400) {
+        setSaveError(error.response?.data?.message || 'Data tidak valid. Periksa kembali isian form.');
+      } else {
+        setSaveError('Gagal menyimpan perubahan. Periksa koneksi internet dan coba lagi.');
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -123,7 +158,10 @@ export default function EditJobPage() {
         <div className="flex flex-col items-center justify-center py-24 text-center">
           <span className="material-symbols-outlined text-6xl text-error mb-4" style={{ fontVariationSettings: "'FILL' 1" }}>error</span>
           <h2 className="text-2xl font-bold text-on-surface mb-2">Lowongan tidak ditemukan</h2>
-          <button onClick={() => router.push('/dashboard')} className="mt-4 text-primary hover:underline text-sm font-medium">← Kembali ke Dashboard</button>
+          <p className="text-sm text-on-surface-variant mb-4">Lowongan mungkin sudah dihapus atau ID tidak valid.</p>
+          <button onClick={() => router.push('/dashboard')} className="mt-2 px-4 py-2 bg-primary text-white rounded-lg text-sm font-semibold hover:bg-primary/90 transition-colors">
+            ← Kembali ke Dashboard
+          </button>
         </div>
       </AdminLayout>
     );
@@ -181,13 +219,31 @@ export default function EditJobPage() {
               {formData.jobTitle ? <><strong className="text-primary">{formData.jobTitle}</strong> · Perbarui detail dan konfigurasi AI.</> : 'Perbarui detail lowongan dan konfigurasi AI screening.'}
             </p>
           </div>
-          {/* Unsaved indicator */}
-          <span className="flex-shrink-0 flex items-center gap-1.5 text-xs text-amber-600 bg-amber-50 border border-amber-200/60 px-3 py-1.5 rounded-full font-medium">
-            <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
-            Belum disimpan
-          </span>
+          {/* Status indicator */}
+          {saveSuccess ? (
+            <span className="flex-shrink-0 flex items-center gap-1.5 text-xs text-emerald-700 bg-emerald-50 border border-emerald-200/60 px-3 py-1.5 rounded-full font-medium">
+              <span className="material-symbols-outlined text-[14px]" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
+              Tersimpan!
+            </span>
+          ) : (
+            <span className="flex-shrink-0 flex items-center gap-1.5 text-xs text-amber-600 bg-amber-50 border border-amber-200/60 px-3 py-1.5 rounded-full font-medium">
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+              Belum disimpan
+            </span>
+          )}
         </div>
       </div>
+
+      {/* Error banner */}
+      {saveError && (
+        <div className="mb-6 flex items-start gap-3 bg-red-50 border border-red-200 rounded-xl px-4 py-3">
+          <span className="material-symbols-outlined text-red-500 text-[20px] flex-shrink-0 mt-0.5" style={{ fontVariationSettings: "'FILL' 1" }}>error</span>
+          <p className="text-sm text-red-700 font-medium">{saveError}</p>
+          <button onClick={() => setSaveError('')} className="ml-auto text-red-400 hover:text-red-600 flex-shrink-0">
+            <span className="material-symbols-outlined text-[18px]">close</span>
+          </button>
+        </div>
+      )}
 
       {/* Step Indicator */}
       <div className="flex items-center gap-0 mb-8">
@@ -279,13 +335,18 @@ export default function EditJobPage() {
             ) : (
               <button
                 onClick={handleSave}
-                disabled={isSubmitting}
+                disabled={isSubmitting || saveSuccess}
                 className="px-6 py-2 bg-primary text-white text-sm font-bold rounded-lg hover:bg-primary/90 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
               >
                 {isSubmitting ? (
                   <>
                     <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                     Menyimpan...
+                  </>
+                ) : saveSuccess ? (
+                  <>
+                    <span className="material-symbols-outlined text-[16px]" style={{ fontVariationSettings: "'FILL' 1" }}>check_circle</span>
+                    Tersimpan!
                   </>
                 ) : (
                   <>
