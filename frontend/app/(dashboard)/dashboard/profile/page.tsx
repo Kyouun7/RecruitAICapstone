@@ -67,13 +67,19 @@ export default function ProfilePage() {
     if (!formData.full_name.trim()) return;
     setIsSaving(true);
     try {
-      // Update local state (API endpoint bisa ditambah nanti)
-      setUser((prev) => prev ? { ...prev, ...formData } : prev);
-      setSaveSuccess(true);
-      setIsEditing(false);
-      setTimeout(() => setSaveSuccess(false), 3000);
-    } catch (err) {
+      const res = await api.put('/api/auth/profile', {
+        full_name: formData.full_name.trim(),
+        company_name: formData.company_name.trim(),
+      });
+      if (res.data.success) {
+        setUser((prev) => prev ? { ...prev, ...formData } : prev);
+        setSaveSuccess(true);
+        setIsEditing(false);
+        setTimeout(() => setSaveSuccess(false), 3000);
+      }
+    } catch (err: any) {
       console.error('Failed to save:', err);
+      alert(err.response?.data?.message || 'Gagal menyimpan profil. Coba lagi.');
     } finally {
       setIsSaving(false);
     }
@@ -95,14 +101,16 @@ export default function ProfilePage() {
     }
     setIsSavingPassword(true);
     try {
-      // Placeholder — tambah API endpoint jika tersedia
-      await new Promise((r) => setTimeout(r, 800));
+      await api.put('/api/auth/change-password', {
+        current_password: passwordData.current_password,
+        new_password: passwordData.new_password,
+      });
       setPasswordSuccess(true);
       setPasswordData({ current_password: '', new_password: '', confirm_password: '' });
       setShowPasswordForm(false);
       setTimeout(() => setPasswordSuccess(false), 3000);
-    } catch {
-      setPasswordError('Gagal mengubah password. Coba lagi.');
+    } catch (err: any) {
+      setPasswordError(err.response?.data?.message || 'Gagal mengubah password. Coba lagi.');
     } finally {
       setIsSavingPassword(false);
     }

@@ -231,4 +231,63 @@ async function resetPassword(req, res) {
     }
 }
 
-module.exports = { register, login, getMe, forgotPassword, resetPassword };
+// UPDATE PROFILE
+async function updateProfile(req, res) {
+    try {
+        const userId = req.user.user_id;
+        const { full_name, company_name } = req.body;
+
+        if (!full_name || !full_name.trim()) {
+            return res.status(400).json({ success: false, message: 'Nama lengkap wajib diisi' });
+        }
+
+        await db.execute(
+            'UPDATE users SET full_name = ?, company_name = ? WHERE user_id = ?',
+            [full_name.trim(), company_name?.trim() || '', userId]
+        );
+
+        res.status(200).json({
+            success: true,
+            message: 'Profil berhasil diperbarui',
+            data: { full_name: full_name.trim(), company_name: company_name?.trim() || '' }
+        });
+    } catch (error) {
+        console.error('Update profile error:', error);
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+}
+
+// CHANGE PASSWORD
+async function changePassword(req, res) {
+    try {
+        const userId = req.user.user_id;
+        const { current_password, new_password } = req.body;
+
+        if (!current_password || !new_password) {
+            return res.status(400).json({ success: false, message: 'Semua field wajib diisi' });
+        }
+        if (new_password.length < 8) {
+            return res.status(400).json({ success: false, message: 'Password baru minimal 8 karakter' });
+        }
+
+        const [users] = await db.execute('SELECT password FROM users WHERE user_id = ?', [userId]);
+        if (users.length === 0) {
+            return res.status(404).json({ success: false, message: 'User tidak ditemukan' });
+        }
+
+        const isValid = await bcrypt.compare(current_password, users[0].password);
+        if (!isValid) {
+            return res.status(400).json({ success: false, message: 'Password saat ini tidak sesuai' });
+        }
+
+        const hashed = await bcrypt.hash(new_password, 10);
+        await db.execute('UPDATE users SET password = ? WHERE user_id = ?', [hashed, userId]);
+
+        res.status(200).json({ success: true, message: 'Password berhasil diubah' });
+    } catch (error) {
+        console.error('Change password error:', error);
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+}
+
+module.exports = { register, login, getMe, forgotPassword, resetPassword, updateProfile, changePassword };
