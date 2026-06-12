@@ -35,6 +35,11 @@ export const metadata: Metadata = {
   title: "RecruitAI",
   description:
     "Sistem rekrutmen cerdas berbasis AI untuk PT. Jalin Mayantara Indonesia",
+  icons: {
+    icon: "/favicon.ico",
+    shortcut: "/favicon.ico",
+    apple: "/favicon.ico",
+  },
 };
 
 export default function RootLayout({

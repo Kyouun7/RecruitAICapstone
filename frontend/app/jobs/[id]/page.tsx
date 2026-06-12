@@ -29,14 +29,14 @@ export default async function JobDetailPage({ params }: { params: Promise<{ id: 
                 <span className="material-symbols-outlined text-3xl text-white/80">corporate_fare</span>
               </div>
               <div>
-                <h1 className="text-3xl md:text-4xl font-bold text-white mb-3 leading-tight">{job.title}</h1>
+                <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-3 leading-tight">{job.title}</h1>
                 <div className="flex flex-wrap items-center gap-3">
                   <span className="flex items-center gap-1.5 text-white/70 text-sm"><span className="material-symbols-outlined text-[16px]">location_on</span>{job.location || 'Remote'}</span>
-                  <span className="text-white/30">•</span>
+                  <span className="text-white/30 hidden sm:inline">•</span>
                   <span className="flex items-center gap-1.5 text-white/70 text-sm"><span className="material-symbols-outlined text-[16px]">work</span>{job.employment_type}</span>
-                  <span className="text-white/30">•</span>
+                  <span className="text-white/30 hidden sm:inline">•</span>
                   <span className="flex items-center gap-1.5 text-white/70 text-sm"><span className="material-symbols-outlined text-[16px]">laptop_mac</span>{job.work_setup}</span>
-                  <span className="text-white/30">•</span>
+                  <span className="text-white/30 hidden sm:inline">•</span>
                   <span className="flex items-center gap-1.5 text-white/70 text-sm"><span className="material-symbols-outlined text-[16px]">calendar_today</span>Diposting {postedDate}</span>
                 </div>
                 <div className="flex flex-wrap gap-2 mt-4">

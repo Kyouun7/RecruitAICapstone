@@ -6,46 +6,36 @@ import AdminLayout from '@/components/admin/AdminLayout';
 import BasicInformationCard from '@/components/create-job/BasicInformationCard';
 import RoleRequirementsCard from '@/components/create-job/RoleRequirementsCard';
 import AIConfigurationCard from '@/components/create-job/AIConfigurationCard';
-import StickyActionBar from '@/components/create-job/StickyActionBar';
 import api from '@/lib/axios';
 
 interface JobFormData {
-  jobTitle: string;
-  employmentType: string;
-  workSetup: string;
-  location: string;
-  aboutRole: string;
-  responsibilities: string;
-  qualifications: string;
-  aiMatchScore: number;
-  autoEmailQualified: boolean;
-  autoEmailRegret: boolean;
+  jobTitle: string; employmentType: string; workSetup: string; location: string;
+  aboutRole: string; responsibilities: string; qualifications: string;
+  aiMatchScore: number; autoEmailQualified: boolean; autoEmailRegret: boolean;
 }
 
-const INITIAL_FORM_DATA: JobFormData = {
-  jobTitle: '',
-  employmentType: 'Full-time',
-  workSetup: 'Remote',
-  location: '',
-  aboutRole: '',
-  responsibilities: '',
-  qualifications: '',
-  aiMatchScore: 85,
-  autoEmailQualified: true,
-  autoEmailRegret: false,
-};
+const STEPS = [
+  { id: 1, label: 'Informasi Dasar', icon: 'info' },
+  { id: 2, label: 'Peran & Persyaratan', icon: 'description' },
+  { id: 3, label: 'Konfigurasi AI', icon: 'psychology' },
+];
 
 export default function EditJobPage() {
   const router = useRouter();
   const params = useParams();
   const jobId = params?.id as string;
 
-  const [formData, setFormData] = useState<JobFormData>(INITIAL_FORM_DATA);
+  const [formData, setFormData] = useState<JobFormData>({
+    jobTitle: '', employmentType: 'Full-time', workSetup: 'Remote', location: '',
+    aboutRole: '', responsibilities: '', qualifications: '',
+    aiMatchScore: 85, autoEmailQualified: true, autoEmailRegret: false,
+  });
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [notFound, setNotFound] = useState(false);
+  const [activeStep, setActiveStep] = useState(1);
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
-  // ---- Fetch existing job data ----
   useEffect(() => {
     async function fetchJob() {
       try {
@@ -64,62 +54,64 @@ export default function EditJobPage() {
             autoEmailQualified: true,
             autoEmailRegret: false,
           });
-        } else {
-          setNotFound(true);
-        }
-      } catch {
-        setNotFound(true);
-      } finally {
-        setIsLoading(false);
-      }
+        } else { setNotFound(true); }
+      } catch { setNotFound(true); }
+      finally { setIsLoading(false); }
     }
     if (jobId) fetchJob();
   }, [jobId]);
 
   const handleFieldChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
+    if (errors[field]) setErrors((prev) => { const e = { ...prev }; delete e[field]; return e; });
   };
+  const handleScoreChange = (value: number) => setFormData((prev) => ({ ...prev, aiMatchScore: value }));
+  const handleToggleQualified = () => setFormData((prev) => ({ ...prev, autoEmailQualified: !prev.autoEmailQualified }));
+  const handleToggleRegret = () => setFormData((prev) => ({ ...prev, autoEmailRegret: !prev.autoEmailRegret }));
 
-  const handleScoreChange = (value: number) => {
-    setFormData((prev) => ({ ...prev, aiMatchScore: value }));
-  };
-
-  const handleToggleQualified = () => {
-    setFormData((prev) => ({ ...prev, autoEmailQualified: !prev.autoEmailQualified }));
-  };
-
-  const handleToggleRegret = () => {
-    setFormData((prev) => ({ ...prev, autoEmailRegret: !prev.autoEmailRegret }));
-  };
-
-  const handleCancel = () => {
-    router.push(`/dashboard/${jobId}`);
-  };
-
-  const handlePublish = async () => {
-    if (!formData.jobTitle.trim()) {
-      alert('Job title wajib diisi.');
-      return;
+  const validateStep = (step: number): boolean => {
+    const newErrors: Record<string, string> = {};
+    if (step === 1) {
+      if (!formData.jobTitle.trim()) newErrors.jobTitle = 'Judul posisi wajib diisi';
+      if (!formData.location.trim()) newErrors.location = 'Lokasi wajib diisi';
     }
-    setIsSubmitting(true);
-    const payload = {
-    title: formData.jobTitle,
-    employment_type: formData.employmentType,
-    work_setup: formData.workSetup,
-    location: formData.location,
-    description: formData.aboutRole,
-    key_responsibilities: formData.responsibilities,
-    minimum_qualifications: formData.qualifications,
-    threshold_score: formData.aiMatchScore,
+    if (step === 2) {
+      if (!formData.aboutRole.trim()) newErrors.aboutRole = 'Deskripsi posisi wajib diisi';
+      if (!formData.responsibilities.trim()) newErrors.responsibilities = 'Tanggung jawab wajib diisi';
+    }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
-  try {
-    await api.put(`/api/jobs/${jobId}`, payload);
-    router.push(`/dashboard/${jobId}`);
-  } catch (error: any) {
-    const msg = error.response?.data?.message || 'Gagal menyimpan perubahan. Silakan coba lagi.';
-    alert(msg);
-  } finally {
+  const handleNext = () => {
+    if (!validateStep(activeStep)) return;
+    setActiveStep((s) => Math.min(s + 1, 3));
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleBack = () => {
+    setActiveStep((s) => Math.max(s - 1, 1));
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleSave = async () => {
+    if (!validateStep(activeStep)) return;
+    setIsSubmitting(true);
+    try {
+      await api.put(`/api/jobs/${jobId}`, {
+        title: formData.jobTitle,
+        employment_type: formData.employmentType,
+        work_setup: formData.workSetup,
+        location: formData.location,
+        description: formData.aboutRole,
+        key_responsibilities: formData.responsibilities,
+        minimum_qualifications: formData.qualifications,
+        threshold_score: formData.aiMatchScore,
+      });
+      router.push(`/dashboard/${jobId}`);
+    } catch (error: any) {
+      alert(error.response?.data?.message || 'Gagal menyimpan perubahan. Silakan coba lagi.');
+    } finally {
       setIsSubmitting(false);
     }
   };
@@ -129,13 +121,9 @@ export default function EditJobPage() {
     return (
       <AdminLayout>
         <div className="flex flex-col items-center justify-center py-24 text-center">
-          <span className="material-symbols-outlined text-6xl text-error mb-4" style={{ fontVariationSettings: "'FILL' 1" }}>
-            error
-          </span>
+          <span className="material-symbols-outlined text-6xl text-error mb-4" style={{ fontVariationSettings: "'FILL' 1" }}>error</span>
           <h2 className="text-2xl font-bold text-on-surface mb-2">Lowongan tidak ditemukan</h2>
-          <button onClick={() => router.push('/dashboard')} className="mt-4 text-primary hover:underline text-sm font-medium">
-            ← Kembali ke Dashboard
-          </button>
+          <button onClick={() => router.push('/dashboard')} className="mt-4 text-primary hover:underline text-sm font-medium">← Kembali ke Dashboard</button>
         </div>
       </AdminLayout>
     );
@@ -145,18 +133,25 @@ export default function EditJobPage() {
   if (isLoading) {
     return (
       <AdminLayout>
-        <div className="mb-10">
-          <div className="h-10 bg-surface-container-high rounded animate-pulse w-72 mb-2" />
-          <div className="h-4 bg-surface-container-high rounded animate-pulse w-96" />
+        <div className="mb-8 space-y-2">
+          <div className="h-5 bg-surface-container-high rounded animate-pulse w-40" />
+          <div className="h-8 bg-surface-container-high rounded animate-pulse w-64" />
+          <div className="h-4 bg-surface-container-high rounded animate-pulse w-80" />
         </div>
-        <div className="space-y-8">
-          {[...Array(3)].map((_, i) => (
-            <div key={i} className="bg-white rounded-xl p-5 sm:p-8 border border-gray-100 animate-pulse">
-              <div className="h-6 bg-surface-container-high rounded w-48 mb-4" />
-              <div className="space-y-3">
-                <div className="h-10 bg-surface-container-high rounded" />
-                <div className="h-10 bg-surface-container-high rounded" />
-              </div>
+        <div className="flex items-center gap-3 mb-8">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="flex items-center gap-2 flex-1 last:flex-none">
+              <div className="w-8 h-8 rounded-full bg-surface-container-high animate-pulse flex-shrink-0" />
+              <div className="h-3 bg-surface-container-high rounded animate-pulse w-20 hidden sm:block" />
+              {i < 3 && <div className="flex-1 h-px bg-surface-container-high ml-2" />}
+            </div>
+          ))}
+        </div>
+        <div className="bg-white rounded-2xl border border-outline-variant/10 shadow-sm p-6 sm:p-8 space-y-4">
+          {[...Array(4)].map((_, i) => (
+            <div key={i} className="space-y-2">
+              <div className="h-3 bg-surface-container-high rounded animate-pulse w-28" />
+              <div className="h-11 bg-surface-container-high rounded-xl animate-pulse" />
             </div>
           ))}
         </div>
@@ -164,51 +159,145 @@ export default function EditJobPage() {
     );
   }
 
+  const isLastStep = activeStep === 3;
+
   return (
     <AdminLayout>
       {/* Page Header */}
-      <div className="mb-10">
-        <h1 className="text-2xl sm:text-4xl font-headline font-bold text-on-surface tracking-tight mb-2">
-          Edit Job Vacancy
-        </h1>
-        <p className="text-on-surface-variant font-body">
-          Perbarui detail lowongan dan konfigurasi AI screening.
-        </p>
+      <div className="mb-8">
+        <button
+          onClick={() => router.push(`/dashboard/${jobId}`)}
+          className="flex items-center gap-1.5 text-sm text-on-surface-variant hover:text-primary transition-colors mb-4"
+        >
+          <span className="material-symbols-outlined text-[18px]">arrow_back</span>
+          Kembali ke Detail Lowongan
+        </button>
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-headline font-bold text-on-surface tracking-tight mb-1">
+              Edit Lowongan
+            </h1>
+            <p className="text-sm text-on-surface-variant">
+              {formData.jobTitle ? <><strong className="text-primary">{formData.jobTitle}</strong> · Perbarui detail dan konfigurasi AI.</> : 'Perbarui detail lowongan dan konfigurasi AI screening.'}
+            </p>
+          </div>
+          {/* Unsaved indicator */}
+          <span className="flex-shrink-0 flex items-center gap-1.5 text-xs text-amber-600 bg-amber-50 border border-amber-200/60 px-3 py-1.5 rounded-full font-medium">
+            <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+            Belum disimpan
+          </span>
+        </div>
       </div>
 
-      {/* Form Sections */}
-      <div className="space-y-8">
-        <BasicInformationCard
-          jobTitle={formData.jobTitle}
-          employmentType={formData.employmentType}
-          workSetup={formData.workSetup}
-          location={formData.location}
-          onFieldChange={handleFieldChange}
-        />
-
-        <RoleRequirementsCard
-          aboutRole={formData.aboutRole}
-          responsibilities={formData.responsibilities}
-          qualifications={formData.qualifications}
-          onFieldChange={handleFieldChange}
-        />
-
-        <AIConfigurationCard
-          aiMatchScore={formData.aiMatchScore}
-          autoEmailQualified={formData.autoEmailQualified}
-          autoEmailRegret={formData.autoEmailRegret}
-          onScoreChange={handleScoreChange}
-          onToggleQualified={handleToggleQualified}
-          onToggleRegret={handleToggleRegret}
-        />
+      {/* Step Indicator */}
+      <div className="flex items-center gap-0 mb-8">
+        {STEPS.map((step, idx) => {
+          const isDone = activeStep > step.id;
+          const isActive = activeStep === step.id;
+          return (
+            <div key={step.id} className="flex items-center flex-1 last:flex-none">
+              <button
+                onClick={() => isDone && setActiveStep(step.id)}
+                className={`flex items-center gap-2 group ${isDone ? 'cursor-pointer' : 'cursor-default'}`}
+              >
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all flex-shrink-0
+                  ${isActive ? 'bg-primary text-white shadow-md shadow-primary/30' : isDone ? 'bg-primary/15 text-primary' : 'bg-surface-container-high text-on-surface-variant'}`}>
+                  {isDone
+                    ? <span className="material-symbols-outlined text-[16px]" style={{ fontVariationSettings: "'FILL' 1" }}>check</span>
+                    : <span>{step.id}</span>
+                  }
+                </div>
+                <span className={`text-xs font-semibold hidden sm:block transition-colors
+                  ${isActive ? 'text-primary' : isDone ? 'text-primary/70' : 'text-on-surface-variant'}`}>
+                  {step.label}
+                </span>
+              </button>
+              {idx < STEPS.length - 1 && (
+                <div className={`flex-1 h-px mx-3 transition-colors ${activeStep > step.id ? 'bg-primary/30' : 'bg-outline-variant/30'}`} />
+              )}
+            </div>
+          );
+        })}
       </div>
 
-      <StickyActionBar
-        onCancel={handleCancel}
-        onPublish={handlePublish}
-        isSubmitting={isSubmitting}
-        publishLabel="Simpan Perubahan"
-      />
+      {/* Step Content */}
+      <div className="pb-28">
+        <div className="bg-white rounded-2xl border border-outline-variant/10 shadow-sm p-6 sm:p-8">
+          {activeStep === 1 && (
+            <BasicInformationCard
+              jobTitle={formData.jobTitle}
+              employmentType={formData.employmentType}
+              workSetup={formData.workSetup}
+              location={formData.location}
+              onFieldChange={handleFieldChange}
+              errors={errors}
+            />
+          )}
+          {activeStep === 2 && (
+            <RoleRequirementsCard
+              aboutRole={formData.aboutRole}
+              responsibilities={formData.responsibilities}
+              qualifications={formData.qualifications}
+              onFieldChange={handleFieldChange}
+              errors={errors}
+            />
+          )}
+          {activeStep === 3 && (
+            <AIConfigurationCard
+              aiMatchScore={formData.aiMatchScore}
+              autoEmailQualified={formData.autoEmailQualified}
+              autoEmailRegret={formData.autoEmailRegret}
+              onScoreChange={handleScoreChange}
+              onToggleQualified={handleToggleQualified}
+              onToggleRegret={handleToggleRegret}
+            />
+          )}
+        </div>
+      </div>
+
+      {/* Sticky Bottom Action Bar */}
+      <footer className="fixed bottom-0 left-0 lg:left-64 right-0 bg-white border-t border-gray-100 px-4 sm:px-8 py-3 z-40">
+        <div className="max-w-5xl mx-auto flex items-center justify-between gap-3">
+          <span className="text-xs text-on-surface-variant hidden sm:block">
+            Langkah {activeStep} dari {STEPS.length}: {STEPS[activeStep - 1].label}
+          </span>
+          <div className="flex items-center gap-3 ml-auto">
+            {activeStep > 1 && (
+              <button onClick={handleBack} className="px-4 py-2 text-sm font-semibold text-on-surface-variant hover:bg-surface-container-low rounded-lg transition-colors border border-outline-variant/30">
+                ← Sebelumnya
+              </button>
+            )}
+            {activeStep === 1 && (
+              <button onClick={() => router.push(`/dashboard/${jobId}`)} className="px-4 py-2 text-sm font-semibold text-on-surface-variant hover:bg-surface-container-low rounded-lg transition-colors">
+                Batal
+              </button>
+            )}
+            {!isLastStep ? (
+              <button onClick={handleNext} className="px-6 py-2 bg-primary text-white text-sm font-bold rounded-lg hover:bg-primary/90 active:scale-95 transition-all">
+                Selanjutnya →
+              </button>
+            ) : (
+              <button
+                onClick={handleSave}
+                disabled={isSubmitting}
+                className="px-6 py-2 bg-primary text-white text-sm font-bold rounded-lg hover:bg-primary/90 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              >
+                {isSubmitting ? (
+                  <>
+                    <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    Menyimpan...
+                  </>
+                ) : (
+                  <>
+                    <span className="material-symbols-outlined text-[16px]" style={{ fontVariationSettings: "'FILL' 1" }}>save</span>
+                    Simpan Perubahan
+                  </>
+                )}
+              </button>
+            )}
+          </div>
+        </div>
+      </footer>
     </AdminLayout>
   );
 }

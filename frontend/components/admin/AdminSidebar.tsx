@@ -73,17 +73,6 @@ export default function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
           );
         })}
       </div>
-
-      {/* Post a Job CTA */}
-      <div className="p-2 mt-auto">
-        <Link
-          href="/dashboard/create"
-          onClick={onClose}
-          className="w-full block text-center bg-gradient-to-br from-primary to-[#003366cc] text-white py-3 rounded-lg font-headline font-semibold active:scale-95 duration-150 shadow-sm hover:shadow-md transition-all"
-        >
-          + Buat Lowongan
-        </Link>
-      </div>
     </aside>
   );
 }

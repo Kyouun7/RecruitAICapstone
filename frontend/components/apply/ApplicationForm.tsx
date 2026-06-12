@@ -127,7 +127,7 @@ export default function ApplicationForm({
           <label className="block text-sm font-semibold text-on-surface" htmlFor="phone">
             Phone Number <span className="text-error">*</span>
           </label>
-          <div className="flex gap-3">
+          <div className="flex gap-2 sm:gap-3">
             {/* Country code selector */}
             <div className="relative min-w-[100px]">
               <div className="bg-surface-low h-full flex items-center justify-between px-3 rounded-lg cursor-pointer hover:bg-surface-high transition-colors">
@@ -198,7 +198,7 @@ export default function ApplicationForm({
             type="submit"
             disabled={isSubmitting}
             className="
-              w-full bg-primary text-on-primary py-5 rounded-xl font-bold text-lg
+              w-full bg-primary text-on-primary py-4 rounded-xl font-bold text-base sm:text-lg
               flex items-center justify-center gap-3
               shadow-lg shadow-primary/20
               hover:opacity-90 active:scale-[0.98] transition-all

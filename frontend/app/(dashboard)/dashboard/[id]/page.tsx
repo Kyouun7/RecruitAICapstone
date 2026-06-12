@@ -139,8 +139,8 @@ function CVDrawer({
     <div className="fixed inset-0 z-50 flex items-stretch justify-end">
       <div className="absolute inset-0 bg-black/30 backdrop-blur-[2px]" onClick={onClose} />
       <div className="relative z-10 flex h-full w-full max-w-[900px] bg-background shadow-2xl">
-        {/* Left: CV Preview */}
-        <div className="flex-1 flex flex-col bg-surface-container-low border-r border-outline-variant/20">
+        {/* Left: CV Preview — hidden on mobile */}
+        <div className="hidden md:flex flex-1 flex-col bg-surface-container-low border-r border-outline-variant/20">
           <div className="flex items-center justify-between px-5 py-3 bg-surface-container-lowest border-b border-outline-variant/20">
             <div className="flex items-center gap-2 text-on-surface-variant text-sm">
               <span className="material-symbols-outlined text-[18px]">description</span>
@@ -169,8 +169,8 @@ function CVDrawer({
             )}
           </div>
         </div>
-        {/* Right: Info */}
-        <div className="w-[290px] flex flex-col bg-surface-container-lowest overflow-y-auto">
+        {/* Right: Info — full width on mobile, fixed width on desktop */}
+        <div className="w-full md:w-[290px] flex flex-col bg-surface-container-lowest overflow-y-auto">
           <div className="px-5 pt-5 pb-4 border-b border-outline-variant/15">
             <p className="text-lg font-bold text-on-surface">{candidate.nama}</p>
             <p className="text-sm text-on-surface-variant">{candidate.posisi}</p>
@@ -338,12 +338,12 @@ export default function JobDetailPage() {
                     <span className="material-symbols-outlined text-[16px]">work</span>
                     {job.employment_type}
                   </span>
-                  <span className="text-outline-variant">•</span>
+                  <span className="text-outline-variant hidden sm:inline">•</span>
                   <span className="flex items-center gap-1">
                     <span className="material-symbols-outlined text-[16px]">location_on</span>
                     {job.location || 'Remote'}
                   </span>
-                  <span className="text-outline-variant">•</span>
+                  <span className="text-outline-variant hidden sm:inline">•</span>
                   <span className="flex items-center gap-1">
                     <span className="material-symbols-outlined text-[16px]">laptop_mac</span>
                     {job.work_setup}
@@ -480,9 +480,9 @@ export default function JobDetailPage() {
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
 
           {/* Table Header */}
-          <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+          <div className="px-4 sm:px-6 py-4 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <h3 className="text-base font-bold text-on-surface font-headline">Pipeline Pelamar</h3>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               {/* Filter */}
               <div className="relative">
                 <select
@@ -512,7 +512,8 @@ export default function JobDetailPage() {
             </div>
           </div>
 
-          <div className="overflow-x-auto -mx-4 sm:mx-0">
+          {/* Desktop: tabel */}
+          <div className="hidden sm:block overflow-x-auto">
             <table className="w-full text-sm text-left min-w-[560px]">
               <thead>
                 <tr className="bg-gray-50 text-gray-500 text-xs uppercase tracking-wider border-b border-gray-100">
@@ -554,7 +555,6 @@ export default function JobDetailPage() {
                         className="hover:bg-blue-50/30 transition-colors group cursor-pointer"
                         onClick={() => setSelectedCandidate(candidate)}
                       >
-                        {/* Nama */}
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-3">
                             <div className={`w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 ${getAvatarColor(candidate.nama)}`}>
@@ -566,7 +566,6 @@ export default function JobDetailPage() {
                             </div>
                           </div>
                         </td>
-                        {/* Score */}
                         <td className="px-6 py-4">
                           {score === null ? (
                             <span className="text-xs text-on-surface-variant italic">Pending</span>
@@ -576,25 +575,20 @@ export default function JobDetailPage() {
                             </span>
                           )}
                         </td>
-                        {/* Status */}
                         <td className="px-6 py-4">
                           <StatusBadge status={candidate.status} score={candidate.score} threshold={threshold} />
                         </td>
-                        {/* Tanggal */}
                         <td className="px-6 py-4 text-on-surface-variant">{formatDate(candidate.created_at)}</td>
-                        {/* Aksi */}
                         <td className="px-6 py-4 text-right" onClick={(e) => e.stopPropagation()}>
-                          <div className="flex justify-end gap-1">
-                            <button
-                              onClick={() => handleSendEmail(candidate)}
-                              className={`p-1.5 rounded-lg transition-colors ${emailSent === candidate.candidate_id ? 'text-[#006c4d] bg-[#f0fdf4]' : 'text-on-surface-variant hover:bg-primary/10 hover:text-primary'}`}
-                              title="Kirim Email"
-                            >
-                              <span className="material-symbols-outlined text-[18px]">
-                                {emailSent === candidate.candidate_id ? 'mark_email_read' : 'mail'}
-                              </span>
-                            </button>
-                          </div>
+                          <button
+                            onClick={() => handleSendEmail(candidate)}
+                            className={`p-1.5 rounded-lg transition-colors ${emailSent === candidate.candidate_id ? 'text-[#006c4d] bg-[#f0fdf4]' : 'text-on-surface-variant hover:bg-primary/10 hover:text-primary'}`}
+                            title="Kirim Email"
+                          >
+                            <span className="material-symbols-outlined text-[18px]">
+                              {emailSent === candidate.candidate_id ? 'mark_email_read' : 'mail'}
+                            </span>
+                          </button>
                         </td>
                       </tr>
                     );
@@ -602,6 +596,76 @@ export default function JobDetailPage() {
                 )}
               </tbody>
             </table>
+          </div>
+
+          {/* Mobile: card list */}
+          <div className="sm:hidden divide-y divide-gray-100">
+            {isLoading ? (
+              [...Array(3)].map((_, i) => (
+                <div key={i} className="px-4 py-4 space-y-2">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-full bg-surface-container-high animate-pulse flex-shrink-0" />
+                    <div className="flex-1 space-y-1.5">
+                      <div className="h-3 bg-surface-container-high rounded animate-pulse w-3/4" />
+                      <div className="h-3 bg-surface-container-high rounded animate-pulse w-1/2" />
+                    </div>
+                  </div>
+                </div>
+              ))
+            ) : filteredCandidates.length === 0 ? (
+              <div className="px-4 py-12 text-center">
+                <span className="material-symbols-outlined text-4xl text-outline-variant block mb-2">group_off</span>
+                <p className="text-sm text-on-surface-variant font-medium">Belum ada kandidat</p>
+                <p className="text-xs text-outline mt-1">
+                  {filterStatus !== 'all' ? 'Tidak ada kandidat dengan filter ini' : 'Bagikan tautan lowongan untuk mulai menerima lamaran'}
+                </p>
+              </div>
+            ) : (
+              filteredCandidates.map((candidate) => {
+                const score = candidate.score;
+                const scoreColor = score === null ? '#737780' : score >= 80 ? '#006c4d' : score >= 60 ? '#d97706' : '#ba1a1a';
+                return (
+                  <div
+                    key={candidate.candidate_id}
+                    onClick={() => setSelectedCandidate(candidate)}
+                    className="px-4 py-4 hover:bg-surface-container-low transition-colors cursor-pointer"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      {/* Kiri: avatar + info */}
+                      <div className="flex items-start gap-3 flex-1 min-w-0">
+                        <div className={`w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 ${getAvatarColor(candidate.nama)}`}>
+                          {getInitials(candidate.nama)}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-semibold text-on-surface text-sm leading-snug truncate">{candidate.nama}</p>
+                          <p className="text-xs text-on-surface-variant mb-2">{candidate.posisi} · {formatDate(candidate.created_at)}</p>
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <StatusBadge status={candidate.status} score={candidate.score} threshold={threshold} />
+                          </div>
+                        </div>
+                      </div>
+                      {/* Kanan: skor + email */}
+                      <div className="flex flex-col items-end gap-2 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
+                        {score !== null ? (
+                          <span className="text-lg font-black" style={{ color: scoreColor }}>{score}<span className="text-xs font-normal text-on-surface-variant">/100</span></span>
+                        ) : (
+                          <span className="text-xs text-on-surface-variant italic">Pending</span>
+                        )}
+                        <button
+                          onClick={() => handleSendEmail(candidate)}
+                          className={`p-1.5 rounded-lg transition-colors ${emailSent === candidate.candidate_id ? 'text-[#006c4d] bg-[#f0fdf4]' : 'text-on-surface-variant hover:bg-primary/10 hover:text-primary'}`}
+                          title="Kirim Email"
+                        >
+                          <span className="material-symbols-outlined text-[18px]">
+                            {emailSent === candidate.candidate_id ? 'mark_email_read' : 'mail'}
+                          </span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })
+            )}
           </div>
 
           {filteredCandidates.length > 0 && (
